@@ -1,0 +1,69 @@
+services:
+  db:
+    image: postgres
+    container_name: umar_db
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+    networks:
+      - umar_network
+  api:
+    build:
+      context: ./backend
+    container_name: umar_api
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - storage
+    ports:
+      - "8000:8000"
+    networks:
+      - umar_network
+      
+  web:
+    build: 
+      context: ./frontend
+    container_name: umar_web
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - umar_network
+
+  storage:
+    image: dxflrs/garage:v2.3.0
+    container_name: umar_storage
+    restart: always
+    ports:
+      - "3900:3900"
+    volumes:
+      - ./storage/garage.toml:/etc/garage.toml 
+      - garagedata:/var/lib/garage
+    networks:
+      - umar_network
+
+volumes:
+  pgdata:
+  garagedata:
+
+networks:
+  umar_network:
+    driver: bridge
