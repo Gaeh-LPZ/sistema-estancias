@@ -1,0 +1,20 @@
+# Ignorar las dependencias locales
+node_modules
+npm-debug.log
+
+# Ignorar las carpetas de compilación previas de Next.js
+.next
+out
+build
+
+# Ignorar archivos locales de entorno (¡no queremos subir secretos!)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Otros archivos innecesarios
+.git
+.vercel
+*.md
