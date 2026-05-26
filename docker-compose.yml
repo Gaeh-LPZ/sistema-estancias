@@ -10,9 +10,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "${PG_HOST_PORT}:5432"
     volumes:
-      - pgdata:/var/lib/postgresql
+      - ./pgdata:/var/lib/postgresql
     networks:
       - umar_network
   api:
@@ -26,7 +26,7 @@ services:
       - db
       - storage
     ports:
-      - "8000:8000"
+      - "${FASTAPI_HOST_PORT}:8000"
     networks:
       - umar_network
       
@@ -40,7 +40,7 @@ services:
     depends_on:
       - api
     ports:
-      - "3000:3000"
+      - "${NEXT_HOST_PORT}:3000"
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -53,16 +53,12 @@ services:
     container_name: umar_storage
     restart: always
     ports:
-      - "3900:3900"
+      - "${GARAGE_HOST_PORT}:3900"
     volumes:
       - ./storage/garage.toml:/etc/garage.toml 
-      - garagedata:/var/lib/garage
+      - ./garagedata:/var/lib/garage
     networks:
       - umar_network
-
-volumes:
-  pgdata:
-  garagedata:
 
 networks:
   umar_network:
