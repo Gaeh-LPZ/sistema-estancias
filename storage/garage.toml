@@ -1,13 +1,17 @@
+# Rutas seguras para el volumen de Docker
 metadata_dir = "/var/lib/garage/meta"
 data_dir = "/var/lib/garage/data"
 db_engine = "sqlite"
+
+# Factor de replicación para un solo nodo
+replication_factor = 1
 
 # Direcciones de red internas
 rpc_bind_addr = "[::]:3901"
 rpc_public_addr = "127.0.0.1:3901"
 
-# Un secreto obligatorio (puedes cambiarlo después por seguridad)
-rpc_secret = "secreto_para_estancias_umar_123"
+# REEMPLAZA ESTO por el resultado de tu openssl rand -hex 32
+rpc_secret = "5420ba0aa217a7bbb4f281915bfcaf7860e5d6184508d84dcdb993605429f090"
 
 [s3_api]
 s3_region = "garage"
@@ -17,3 +21,10 @@ root_domain = ".s3.garage.localhost"
 [s3_web]
 bind_addr = "[::]:3902"
 root_domain = ".web.garage.localhost"
+
+# Habilitamos la API de administración (Solo accesible internamente)
+[admin]
+api_bind_addr = "[::]:3903"
+# REEMPLAZA ESTOS por el resultado de tu openssl rand -base64 32
+admin_token = "WdOq9B/UrLnZwVZYBI9D0kV3UifG3Su30VVmBdquRJw="
+metrics_token = "Ls0nwyQc6nDgSjHrmJDWE86emTVJrnNdF8VlJZNStGc="
