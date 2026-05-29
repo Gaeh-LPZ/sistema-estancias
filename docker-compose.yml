@@ -13,6 +13,7 @@ services:
       - "${PG_HOST_PORT}:5432"
     volumes:
       - ./pgdata:/var/lib/postgresql
+      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
     networks:
       - umar_network
   api:

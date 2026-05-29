@@ -1,4 +1,7 @@
 fastapi
 uvicorn
-psycopg2-binary
 sqlalchemy
+psycopg2-binary  # El driver para conectar Python con PostgreSQL
+pandas
+openpyxl
+python-multipart
