@@ -48,7 +48,7 @@ export default function UploadExcelButton() {
                 className="hidden bg-white md:flex items-center gap-1 border border-gray-300 py-2 px-6 rounded-md font-medium text-xs hover:bg-[#f2f4f6] transition-colors shadow-sm cursor-pointer"
             >
                 <span className="material-symbols-outlined text-[18px]">upload_file</span>
-                Importar Excel
+                Importar Estudiantes
             </button>
         </>
     );
