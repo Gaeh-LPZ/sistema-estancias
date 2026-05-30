@@ -17,4 +17,5 @@ class Estudiante(Base):
     nombre = Column(String, nullable=False)
     carrera = Column(String, nullable=False)
     semestre_egresado = Column(String, nullable=False)
+    matricula = Column(String, nullable=False)
     rol_id = Column(Integer, ForeignKey("roles.id"), nullable=True)
