@@ -1,10 +1,11 @@
+import { Estudiantes } from "@/app/types/admin/types";
+
 export default async function TablaEstudiantes() {
-    //const rawData = await fetch('http://localhost:8000/api/estudiantes/obtener-estudiantes');
-    //const data = await rawData.json();
+    const rawData = await fetch('http://api:8000/api/estudiantes/obtener-estudiantes', { cache: 'no-store' });
+    const data: Estudiantes[] = await rawData.json();
 
     return (
         <div className="overflow-x-auto flex-1">
-            
             <table className="w-full text-left border-collapse min-w-225">
                 <thead className="sticky top-0 bg-[#f2f4f6] border-b border-gray-300 z-10">
                     <tr>
@@ -17,42 +18,49 @@ export default async function TablaEstudiantes() {
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant">
+                    {data.map((estudiante) => {
+                        const totalDocumentos = 13;
+                        const documentosEntregados = estudiante.documentos ? estudiante.documentos.filter(doc => doc.url_archivo !== null).length : 0;
 
-                    <tr className="hover:bg-white hover:shadow-[inset_2px_0_0_0_#1e3a8a] transition-all group">
-                        <td className="py-3 px-6">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-[#d3e4fe] text-blue-950 flex items-center justify-center font-bold shrink-0">
-                                    AG
+                        const porcentajeProgreso = (documentosEntregados / totalDocumentos) * 100;
+                        return (
+                        <tr key={estudiante.id} className="hover:bg-white hover:shadow-[inset_2px_0_0_0_#1e3a8a] transition-all group">
+                            <td className="py-3 px-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-[#d3e4fe] text-blue-950 flex items-center justify-center font-bold shrink-0">
+                                        {estudiante.nombre.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <p className="text-[14px] font-medium">{estudiante.nombre}</p>
+                                        <p className="font-medium text-xs">{estudiante.correo}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-[14px] font-medium">Ana García Mendoza</p>
-                                    <p className="font-medium text-xs">ana.garcia@estudiantes.edu</p>
+                            </td>
+                            <td className="py-3 px-6 text-[14px]">{estudiante.matricula}</td>
+                            <td className="py-3 px-6 text-[14px]">{estudiante.carrera}</td>
+                            <td className="py-3 px-6">
+                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#d0e1fb] text-[14px] font-bold">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#54647a]"></span>
+                                    {estudiante.status}
+                                </span>
+                            </td>
+                            <td className="py-3 px-6">
+                                <div className="flex items-center gap-3 w-32">
+                                    <div className="flex-1 h-2 bg-[#e0e3e5] rounded-full overflow-hidden">
+                                        <div className="h-full bg-[#1e3a8a] transition-all duration-300" style={{ width: `${porcentajeProgreso}%` }}></div>
+                                    </div>
+                                    <span className="text-[14px]">{documentosEntregados}/{totalDocumentos}</span>
                                 </div>
-                            </div>
-                        </td>
-                        <td className="py-3 px-6 text-[14px]">A-102938</td>
-                        <td className="py-3 px-6 text-[14px]">Ingeniería en Software</td>
-                        <td className="py-3 px-6">
-                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#d0e1fb] text-[14px] font-bold">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#54647a]"></span>
-                                Validado
-                            </span>
-                        </td>
-                        <td className="py-3 px-6">
-                            <div className="flex items-center gap-3 w-32">
-                                <div className="flex-1 h-2 bg-[#e0e3e5] rounded-full overflow-hidden">
-                                    <div className="h-full bg-[#1e3a8a] w-full"></div>
+                            </td>
+                            <td className="py-3 px-6 text-right">
+                                <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button className="px-3 py-1.5 rounded text-gray-600 hover:bg-surface-[#e6e8ea] text-[14px] transition-colors border border-[#c5c5d3] cursor-pointer">Ver detalle</button>
+                                    <button className="px-3 py-1.5 rounded bg-[#1e3a8a] text-white hover:bg-[#00236f] text-[14px] transition-colors shadow-sm cursor-pointer">Validar</button>
                                 </div>
-                                <span className="text-[14px]">5/5</span>
-                            </div>
-                        </td>
-                        <td className="py-3 px-6 text-right">
-                            <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button className="px-3 py-1.5 rounded text-gray-600 hover:bg-surface-[#e6e8ea] text-[14px] transition-colors border border-[#c5c5d3] cursor-pointer">Ver detalle</button>
-                                <button className="px-3 py-1.5 rounded bg-[#1e3a8a] text-white hover:bg-[#00236f] text-[14px] transition-colors shadow-sm cursor-pointer">Validar</button>
-                            </div>
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>

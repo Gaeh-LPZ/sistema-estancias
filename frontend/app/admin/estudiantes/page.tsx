@@ -1,6 +1,7 @@
 import CardWrapper from "@/app/ui/admin/Cards";
 import UploadExcelButton from "@/app/ui/admin/UploadExcelButton";
 import TablaEstudiantes from "@/app/ui/admin/TablaEstudiantes";
+import BotonExportar from "@/app/ui/admin/ExportarExcel";
 
 export default function Page() {
     return (
@@ -12,10 +13,7 @@ export default function Page() {
                 </div>
                 <div className="flex flex-row gap-2">
                     <UploadExcelButton/>
-                    <button className="hidden bg-white md:flex items-center gap-1 border border-gray-300 py-2 px-6 rounded-md font-medium text-xs hover:bg-[#f2f4f6] transition-colors shadow-sm cursor-pointer">
-                        <span className="material-symbols-outlined text-[18px]">download</span>
-                        Exportar Estudiantes
-                    </button>
+                    <BotonExportar/>
                 </div>
             </header>
             <CardWrapper />
