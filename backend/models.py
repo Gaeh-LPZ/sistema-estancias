@@ -1,6 +1,14 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+import enum
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.orm import relationship
 from database import Base
+
+class EstadoEstudiante(enum.Enum):
+    SIN_ENTREGAS = "Sin Entregas"
+    EN_PROCESO = "En Proceso"
+    PENDIENTE = "Pendiente"
+    VALIDADO = "Validado"
 
 class Rol(Base):
     __tablename__ = "roles"
@@ -18,4 +26,19 @@ class Estudiante(Base):
     carrera = Column(String, nullable=False)
     semestre_egresado = Column(String, nullable=False)
     matricula = Column(String, nullable=False)
+
+    status = Column(Enum(EstadoEstudiante), default=EstadoEstudiante.SIN_ENTREGAS, nullable=False)
+    documentos = relationship("Documento", back_populates="estudiante")
     rol_id = Column(Integer, ForeignKey("roles.id"), nullable=True)
+
+class Documento(Base):
+    __tablename__ = "documentos"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    nombre_documento = Column(String(100), nullable=False)
+    url_archivo = Column(String, nullable=True)
+    estado_documento = Column(String(30), default="Pendiente") 
+
+    estudiante_id = Column(Integer, ForeignKey("estudiantes.id"), nullable=False)
+    
+    estudiante = relationship("Estudiante", back_populates="documentos")
