@@ -9,6 +9,7 @@ export interface Documento {
 export interface Estudiantes {
     id: number;
     correo: string;
+    grupo: string;
     nombre: string;
     carrera: string;
     semestre_egresado: string;
