@@ -15,14 +15,14 @@ export default function Page() {
                     <h1 className="text-3xl font-bold">Gestión de Estancias</h1>
                     <p className="text-gray-500">Universidad del Mar</p>
                 </header>
-                <form action="" className="flex flex-col gap-1.5 w-full">
+                <form action="" className="flex flex-col gap-2.5 w-full">
                     <label className="flex flex-col text-xs">Correo electrónico
                         <input type="email" name="correo" placeholder="umar@gs.aulavirtual.mx" className="p-2.5 bg-gray-100 border border-gray-300 placeholder:text-sm"/>
                     </label>
-                    <label className="flex flex-col text-sm">Contraseña
+                    <label className="flex flex-col text-xs">Contraseña
                         <input type="password" name="password" placeholder="∙∙∙∙∙∙" className="p-2.5 bg-gray-100 border border-gray-300 placeholder:text-sm"/>
                     </label>
-                    <button>Iniciar Sesión</button>
+                    <button className="p-2 bg-[#1e3a8a] text-white hover:scale-105 transition-all transform w-full">Iniciar Sesión</button>
                 </form>
             </section>
             <aside className="h-full w-2/3 relative overflow-hidden">
