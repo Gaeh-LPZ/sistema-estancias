@@ -74,7 +74,7 @@ async def cargar_estudiantes_excel(
         df = pd.read_excel(file.file, engine='openpyxl')
         df.columns = df.columns.str.lower()
         
-        columnas_esperadas = ['correo', 'nombre', 'carrera', 'matricula', 'semestre']
+        columnas_esperadas = ['correo', 'nombre', 'carrera', 'matricula', 'grupo', 'semestre']
         for col in columnas_esperadas:
             if col not in df.columns:
                  raise HTTPException(status_code=400, detail=f"Falta la columna: {col}")
@@ -89,6 +89,7 @@ async def cargar_estudiantes_excel(
                     nombre=row['nombre'],
                     carrera=row['carrera'],
                     matricula=row['matricula'],
+                    grupo=row['grupo'],
                     semestre_egresado=str(row['semestre']),
                     rol_id=rol_estudiante.id
                 )
@@ -166,3 +167,12 @@ async def exportar_estudiantes_excel(db: Session = Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al exportar: {str(e)}")
+    
+@app.get('/api/usuarios/rol')
+async def obtener_rol_usuario(correo: str, db: Session = Depends(get_db)):
+    estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
+    if not estudiante or not estudiante.rol_id:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado o sin rol")
+        
+    rol = db.query(models.Rol).filter(models.Rol.id == estudiante.rol_id).first()
+    return {"rol": rol.rol}

@@ -13,10 +13,22 @@ CREATE TABLE IF NOT EXISTS estudiantes (
     carrera VARCHAR(255) NOT NULL,
     semestre_egresado VARCHAR(50) NOT NULL,
     matricula VARCHAR(50) NOT NULL,
+    grupo VARCHAR(50) NOT NULL,
     status estadoestudiante DEFAULT 'SIN_ENTREGAS' NOT NULL,
     rol_id INT REFERENCES roles(id) ON DELETE SET NULL
 );
 
+CREATE TABLE IF NOT EXISTS detalles_estancia (
+    id SERIAL PRIMARY KEY,
+    estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE UNIQUE NOT NULL,
+    nombre_empresa VARCHAR(255) NOT NULL,
+    nombre_proyecto VARCHAR(255) NOT NULL,
+    nombre_asesor VARCHAR(255) NOT NULL,
+    cargo_asesor VARCHAR(255),
+    correo_asesor VARCHAR(255),
+    fecha_inicio DATE,
+    fecha_fin DATE
+);
 
 CREATE TABLE IF NOT EXISTS documentos (
     id SERIAL PRIMARY KEY,
@@ -38,13 +50,14 @@ VALUES
 )
 ON CONFLICT (rol) DO NOTHING;
 
-INSERT INTO estudiantes (correo, nombre, carrera, semestre_egresado, matricula, status, rol_id)
+INSERT INTO estudiantes (correo, nombre, carrera, semestre_egresado, matricula, grupo, status, rol_id)
 VALUES (
     'lobg050328@gs.utm.mx',
     'Gael López Bautista',
     'Ingeniería en Computación',
     'Sexto Semestre',
     '2023020305',
+    '602-A',
     'SIN_ENTREGAS',
-    (SELECT id FROM roles WHERE rol = 'Administrador')
+    (SELECT id FROM roles WHERE rol = 'Estudiante')
 ) ON CONFLICT (correo) DO NOTHING;
