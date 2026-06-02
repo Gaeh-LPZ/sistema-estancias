@@ -1,8 +1,38 @@
 import { Estudiantes } from "@/app/types/admin/types";
 
-export default async function TablaEstudiantes() {
-    const rawData = await fetch('http://api:8000/api/estudiantes/obtener-estudiantes', { cache: 'no-store' });
-    const data: Estudiantes[] = await rawData.json();
+export default async function TablaEstudiantes({
+    query = '',
+    carrera = '',
+    estado = ''
+}: {
+    query?: string;
+    carrera?: string;
+    estado?: string;
+}) {
+    const rawData = await fetch('http://api:8000/api/estudiantes/obtener-estudiantes', {
+        cache: 'no-store'
+    });
+    let data: Estudiantes[] = await rawData.json();
+
+    if (!Array.isArray(data)) {
+        return <div className="text-red-500 p-4">Error al cargar datos.</div>;
+    }
+
+    if (query) {
+        const lowerQuery = query.toLowerCase();
+        data = data.filter((estudiante) =>
+            String(estudiante.nombre).toLowerCase().includes(lowerQuery) || 
+            String(estudiante.matricula).toLowerCase().includes(lowerQuery)
+        );
+    }
+
+    if (carrera && carrera !== 'Todas las Carreras') {
+        data = data.filter((estudiante) => estudiante.carrera === carrera);
+    }
+
+    if (estado && estado !== 'Cualquier Estado') {
+        data = data.filter((estudiante) => estudiante.status === estado);
+    }
 
     return (
         <div className="overflow-x-auto flex-1">
@@ -10,6 +40,7 @@ export default async function TablaEstudiantes() {
                 <thead className="sticky top-0 bg-[#f2f4f6] border-b border-gray-300 z-10">
                     <tr>
                         <th className="py-3 px-6 font-bold text-xs text-gray-600">Nombre del Estudiante</th>
+                        <th className="py-3 px-6 font-bold text-xs text-gray-600">Grupo</th>
                         <th className="py-3 px-6 font-bold text-xs text-gray-600">Carrera</th>
                         <th className="py-3 px-6 font-bold text-xs text-gray-600">Matrícula</th>
                         <th className="py-3 px-6 font-bold text-xs text-gray-600">Estado Global</th>
@@ -18,11 +49,16 @@ export default async function TablaEstudiantes() {
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant">
-                    {data.map((estudiante) => {
-                        const totalDocumentos = 13;
-                        const documentosEntregados = estudiante.documentos ? estudiante.documentos.filter(doc => doc.url_archivo !== null).length : 0;
-
-                        const porcentajeProgreso = (documentosEntregados / totalDocumentos) * 100;
+                    {data.length === 0 ? (
+                        <tr>
+                            <td colSpan={6} className="py-8 text-center text-gray-500">
+                                No se encontraron estudiantes con esos filtros.
+                            </td>
+                        </tr>
+                    ) : (data.map((estudiante) => {
+                            const totalDocumentos = 13;
+                            const documentosEntregados = estudiante.documentos ? estudiante.documentos.filter((doc: any) => doc.url_archivo !== null).length : 0;
+                            const porcentajeProgreso = (documentosEntregados / totalDocumentos) * 100;
                         return (
                         <tr key={estudiante.id} className="hover:bg-white hover:shadow-[inset_2px_0_0_0_#1e3a8a] transition-all group">
                             <td className="py-3 px-6">
@@ -36,6 +72,7 @@ export default async function TablaEstudiantes() {
                                     </div>
                                 </div>
                             </td>
+                            <td className="py-3 px-6 text-[14px]">{estudiante.grupo}</td>
                             <td className="py-3 px-6 text-[14px]">{estudiante.matricula}</td>
                             <td className="py-3 px-6 text-[14px]">{estudiante.carrera}</td>
                             <td className="py-3 px-6">
@@ -60,7 +97,7 @@ export default async function TablaEstudiantes() {
                             </td>
                         </tr>
                         );
-                    })}
+                    }))}
                 </tbody>
             </table>
         </div>

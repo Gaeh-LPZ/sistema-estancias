@@ -8,8 +8,7 @@ const links = [
     { href: '/admin', icon: 'dashboard', name: 'Dashboard' },
     { href: '/admin/estudiantes', icon: 'group', name: 'Estudiantes' },
     { href: '#', icon: 'fact_check', name: 'Validación' },
-    { href: '#', icon: 'analytics', name: 'Reportes' },
-    { href: '#', icon: 'description', name: 'Documentos' }
+    { href: '#', icon: 'analytics', name: 'Reportes' }
 ]
 
 export default function NavBarAdmin() {
