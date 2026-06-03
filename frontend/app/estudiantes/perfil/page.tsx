@@ -1,6 +1,6 @@
 export default function Page() {
     return (
-        <section className="w-screen xl:max-w-5/6">
+        <section className="w-screen xl:max-w-5/6 overflow-y-auto">
             <header className="flex flex-row p-10 items-center justify-between border-b border-gray-400">
                 <div className="flex flex-row gap-5 items-center">
                     <p className="text-4xl font-bold w-20 h-20 md:w-24 md:h-24 rounded-md bg-[#b6c4ff] border-4 border-[#f7f9fb] flex items-center justify-center shadow-sm">GL</p>
@@ -20,7 +20,7 @@ export default function Page() {
                 </button>
             </header>
 
-            <div className="grid grid-cols-3 grid-rows-4 pl-7 pt-7 pr-7 gap-3">
+            <div className="grid grid-cols-3 grid-rows-4 p-7 gap-3">
                 <div className="col-span-2 row-span-2 outline outline-gray-300 rounded-md">
                     <div className="flex flex-row w-full gap-1.5 items-center p-4 bg-[#f2f4f6] border-b border-b-gray-300">
                         <span className="material-symbols-outlined text-secondary">person</span>

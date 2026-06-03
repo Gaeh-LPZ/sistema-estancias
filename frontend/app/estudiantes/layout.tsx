@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function Layout({children,}:Readonly<{children: React.ReactNode;}>){
     return (
-        <main className={`${inter.className} h-screen w-screen flex flex-row`}>
+        <main className={`${inter.className} h-screen w-screen flex flex-row overflow-hidden`}>
             <NavBarEstudiantes/>
             {children}
         </main>
