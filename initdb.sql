@@ -6,10 +6,12 @@ CREATE TABLE IF NOT EXISTS roles (
 
 CREATE TYPE estadoestudiante AS ENUM ('SIN_ENTREGAS', 'EN_PROCESO', 'PENDIENTE', 'VALIDADO');
 
+-- Tablas de detalles de los estudiantes
 CREATE TABLE IF NOT EXISTS estudiantes (
     id SERIAL PRIMARY KEY,
     correo VARCHAR(255) UNIQUE NOT NULL,
     nombre VARCHAR(255) NOT NULL,
+    apellidos VARCHAR(255) NOT NULL,
     carrera VARCHAR(255) NOT NULL,
     semestre_egresado VARCHAR(50) NOT NULL,
     matricula VARCHAR(50) NOT NULL,
@@ -18,16 +20,34 @@ CREATE TABLE IF NOT EXISTS estudiantes (
     rol_id INT REFERENCES roles(id) ON DELETE SET NULL
 );
 
-CREATE TABLE IF NOT EXISTS detalles_estancia (
+-- Información domiciliaria
+CREATE TABLE IF NOT EXISTS domicilio_estudiante (
     id SERIAL PRIMARY KEY,
-    estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE UNIQUE NOT NULL,
-    nombre_empresa VARCHAR(255) NOT NULL,
-    nombre_proyecto VARCHAR(255) NOT NULL,
-    nombre_asesor VARCHAR(255) NOT NULL,
-    cargo_asesor VARCHAR(255),
-    correo_asesor VARCHAR(255),
-    fecha_inicio DATE,
-    fecha_fin DATE
+    calle VARCHAR(255) NOT NULL,
+    colonia VARCHAR(255) NOT NULL,
+    ciudad VARCHAR(255) NOT NULL,
+    municipio VARCHAR(255) NOT NULL,
+    codigo_postal VARCHAR(255) NOT NULL,
+    estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE NOT NULL
+);
+
+-- Información del contacto del estudiante
+CREATE TABLE IF NOT EXISTS contacto_estudiante (
+    id SERIAL PRIMARY KEY,
+    correo_alternativo VARCHAR(255) NOT NULL,
+    telefono VARCHAR(255) NOT NULL,
+    telefono_emergencia VARCHAR(255) NOT NULL,
+    estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE UNIQUE NOT NULL
+);
+
+-- Información extra en los datos personales
+CREATE TABLE IF NOT EXISTS datos_estudiante (
+    id SERIAL PRIMARY KEY,
+    fecha_nacimiento DATE NOT NULL,
+    genero VARCHAR(50) NOT NULL,
+    curp VARCHAR(50) NOT NULL,
+    nss VARCHAR(50) NOT NULL,
+    estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS documentos (
@@ -35,7 +55,7 @@ CREATE TABLE IF NOT EXISTS documentos (
     nombre_documento VARCHAR(100) NOT NULL,
     url_archivo TEXT,
     estado_documento VARCHAR(30) DEFAULT 'Pendiente',
-    estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE NOT NULL
+    estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE UNIQUE NOT NULL
 );
 
 INSERT INTO roles (rol, permisos) 
@@ -50,14 +70,15 @@ VALUES
 )
 ON CONFLICT (rol) DO NOTHING;
 
-INSERT INTO estudiantes (correo, nombre, carrera, semestre_egresado, matricula, grupo, status, rol_id)
+INSERT INTO estudiantes (correo, nombre, apellidos, carrera, semestre_egresado, matricula, grupo, status, rol_id)
 VALUES (
     'lobg050328@gs.utm.mx',
-    'Gael López Bautista',
+    'Gael',
+    'López Bautista',
     'Ingeniería en Computación',
     'Sexto Semestre',
     '2023020305',
     '602-A',
     'SIN_ENTREGAS',
-    (SELECT id FROM roles WHERE rol = 'Estudiante')
+    (SELECT id FROM roles WHERE rol = 'Administrador')
 ) ON CONFLICT (correo) DO NOTHING;

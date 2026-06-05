@@ -1,8 +1,9 @@
 import enum
 from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Date
 from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base
+from datetime import date
 
 class EstadoEstudiante(enum.Enum):
     SIN_ENTREGAS = "Sin Entregas"
@@ -17,19 +18,53 @@ class Rol(Base):
     rol = Column(String(50), nullable=False, unique=True)
     permisos = Column(ARRAY(String), server_default='{}')
 
+# ===========================================
+#           Datos del estudiante
+# ===========================================
 class Estudiante(Base):
     __tablename__ = "estudiantes"
     
-    id = Column(Integer, primary_key=True, index=True)
-    correo = Column(String, unique=True, index=True, nullable=False)
-    nombre = Column(String, nullable=False)
-    carrera = Column(String, nullable=False)
-    semestre_egresado = Column(String, nullable=False)
-    matricula = Column(String, nullable=False)
-    grupo = Column(String, nullable=False)
-    status = Column(Enum(EstadoEstudiante), default=EstadoEstudiante.SIN_ENTREGAS, nullable=False)
-    documentos = relationship("Documento", back_populates="estudiante")
-    rol_id = Column(Integer, ForeignKey("roles.id"), nullable=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    correo: Mapped[str] = mapped_column(String, nullable=False)
+    nombre: Mapped[str] = mapped_column(String, nullable=False)
+    apellidos: Mapped[str] = mapped_column(String, nullable=False)
+    carrera: Mapped[str] = mapped_column(String, nullable=False)
+    semestre_egresado : Mapped[str] = mapped_column(String, nullable=False)
+    matricula: Mapped[str] = mapped_column(String, nullable=False)
+    grupo: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[EstadoEstudiante] = mapped_column(Enum(EstadoEstudiante), default=EstadoEstudiante.SIN_ENTREGAS, nullable=False)
+    documentos: Mapped[list["Documento"]] = relationship("Documento", back_populates="estudiante")
+    rol_id: Mapped[int] = mapped_column(Integer, ForeignKey("roles.id"), nullable=True)
+
+class DomicilioEstudiante(Base):
+    __tablename__ = "domicilio_estudiante"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    calle: Mapped[str] = mapped_column(String, nullable=False)
+    colonia: Mapped[str] = mapped_column(String, nullable=False)
+    ciudad: Mapped[str] = mapped_column(String, nullable=False)
+    municipio: Mapped[str] = mapped_column(String, nullable=False)
+    codigo_postal: Mapped[str] = mapped_column(String, nullable=False)
+    estudiante_id: Mapped[int] = mapped_column(Integer, ForeignKey("estudiantes.id", ondelete="CASCADE"), unique=True, nullable=False)
+
+class ContactoEstudiante(Base):
+    __tablename__ = "contacto_estudiante"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    correo_alternativo: Mapped[str] = mapped_column(String, nullable=False)
+    telefono: Mapped[str] = mapped_column(String, nullable=False)
+    telefono_emergencia: Mapped[str] = mapped_column(String, nullable=False)
+    estudiante_id: Mapped[int] = mapped_column(Integer, ForeignKey("estudiantes.id", ondelete="CASCADE"), unique=True, nullable=False)
+
+class DatosEstudiante(Base):
+    __tablename__ = "datos_estudiante"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    fecha_nacimiento: Mapped[date] = mapped_column(Date, nullable=False)
+    genero: Mapped[str] = mapped_column(String, nullable=False)
+    curp: Mapped[str] = mapped_column(String, nullable=False)
+    nss: Mapped[str] = mapped_column(String, nullable=False)
+    estudiante_id: Mapped[int] = mapped_column(Integer, ForeignKey("estudiantes.id", ondelete="CASCADE"), unique=True, nullable=False)
 
 class Documento(Base):
     __tablename__ = "documentos"
@@ -42,16 +77,3 @@ class Documento(Base):
     estudiante_id = Column(Integer, ForeignKey("estudiantes.id"), nullable=False)
     
     estudiante = relationship("Estudiante", back_populates="documentos")
-
-class DetallesEstancia(Base):
-    __tablename__ = "detalles_estancia"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    estudiante_id = Column(Integer, ForeignKey("estudiantes.id", ondelete="CASCADE"), unique=True, nullable=False)
-    nombre_empresa = Column(String, nullable=False)
-    nombre_proyecto = Column(String, nullable=False)
-    nombre_asesor = Column(String, nullable=False)
-    cargo_asesor = Column(String, nullable=True)
-    correo_asesor = Column(String, nullable=True)
-    fecha_inicio = Column(Date, nullable=True)
-    fecha_fin = Column(Date, nullable=True)

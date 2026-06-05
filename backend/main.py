@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 import pandas as pd
 import io
 from fastapi.responses import StreamingResponse
+from schemas import PerfilCompletoUpdate
+from datetime import date
 
 from database import engine, Base, get_db
 import models
@@ -74,7 +76,7 @@ async def cargar_estudiantes_excel(
         df = pd.read_excel(file.file, engine='openpyxl')
         df.columns = df.columns.str.lower()
         
-        columnas_esperadas = ['correo', 'nombre', 'carrera', 'matricula', 'grupo', 'semestre']
+        columnas_esperadas = ['correo', 'nombre', 'apellidos', 'carrera', 'matricula', 'grupo', 'semestre']
         for col in columnas_esperadas:
             if col not in df.columns:
                  raise HTTPException(status_code=400, detail=f"Falta la columna: {col}")
@@ -87,6 +89,7 @@ async def cargar_estudiantes_excel(
                 nuevo_estudiante = models.Estudiante(
                     correo=row['correo'],
                     nombre=row['nombre'],
+                    apellidos=row['apellidos'],
                     carrera=row['carrera'],
                     matricula=row['matricula'],
                     grupo=row['grupo'],
@@ -136,7 +139,7 @@ async def exportar_estudiantes_excel(db: Session = Depends(get_db)):
         for est in estudiantes:
             docs_entregados = [doc.nombre_documento for doc in est.documentos if doc.url_archivo is not None]
             
-            nombres_docs = ", ".join(docs_entregados) if docs_entregados else "Ninguno"
+            nombres_docs = ", ".join(docs_entregados) if docs_entregados else "Ninguno" # type: ignore
             
             datos_excel.append({
                 "Nombre": est.nombre,
@@ -175,4 +178,107 @@ async def obtener_rol_usuario(correo: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Usuario no encontrado o sin rol")
         
     rol = db.query(models.Rol).filter(models.Rol.id == estudiante.rol_id).first()
-    return {"rol": rol.rol}
+    return {"rol": rol.rol} # type: ignore
+
+@app.patch('/api/estudiantes/perfil/{correo}')
+async def actualizar_perfil(correo: str, datos_parciales: dict, db: Session = Depends(get_db)):
+    # 1. Buscamos al estudiante principal
+    estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+
+    campos_principal = ["nombre", "matricula", "grupo", "carrera"]
+    campos_contacto = ["correo_alternativo", "telefono", "telefono_emergencia"]
+    campos_domicilio = ["calle", "colonia", "ciudad", "municipio", "codigo_postal"]
+    campos_datos = ["fecha_nacimiento", "genero", "curp", "nss"]
+
+    try:
+        for clave, valor in datos_parciales.items():
+            
+            # --- Tabla: Estudiante ---
+            if clave in campos_principal:
+                setattr(estudiante, clave, valor)
+
+            # --- Tabla: Contacto ---
+            elif clave in campos_contacto:
+                contacto = db.query(models.ContactoEstudiante).filter(models.ContactoEstudiante.estudiante_id == estudiante.id).first()
+                if contacto:
+                    setattr(contacto, clave, valor)
+                else:
+                    # Rellenamos los campos obligatorios con strings vacíos
+                    nuevo_contacto = models.ContactoEstudiante(
+                        estudiante_id=estudiante.id,
+                        correo_alternativo="",
+                        telefono="",
+                        telefono_emergencia=""
+                    )
+                    setattr(nuevo_contacto, clave, valor)
+                    db.add(nuevo_contacto)
+
+            # --- Tabla: Domicilio ---
+            elif clave in campos_domicilio:
+                domicilio = db.query(models.DomicilioEstudiante).filter(models.DomicilioEstudiante.estudiante_id == estudiante.id).first()
+                if domicilio:
+                    setattr(domicilio, clave, valor)
+                else:
+                    # Rellenamos los campos obligatorios con strings vacíos
+                    nuevo_domicilio = models.DomicilioEstudiante(
+                        estudiante_id=estudiante.id,
+                        calle="", colonia="", ciudad="", municipio="", codigo_postal=""
+                    )
+                    setattr(nuevo_domicilio, clave, valor)
+                    db.add(nuevo_domicilio)
+
+            # --- Tabla: Datos Personales ---
+            elif clave in campos_datos:
+                datos = db.query(models.DatosEstudiante).filter(models.DatosEstudiante.estudiante_id == estudiante.id).first()
+                if datos:
+                    setattr(datos, clave, valor)
+                else:
+                    # Rellenamos los campos obligatorios. 
+                    # Usamos una fecha por defecto (ej. 2000-01-01) para que Postgres no rechace el Date
+                    nuevo_datos = models.DatosEstudiante(
+                        estudiante_id=estudiante.id,
+                        fecha_nacimiento=date(2000, 1, 1), 
+                        genero="",
+                        curp="",
+                        nss=""
+                    )
+                    setattr(nuevo_datos, clave, valor)
+                    db.add(nuevo_datos)
+
+        # Guardamos todo
+        db.commit()
+        return {"status": "success", "mensaje": "Campo actualizado correctamente"}
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
+    
+@app.get('/api/estudiantes/perfil/{correo}')
+async def obtener_perfil(correo: str, db: Session = Depends(get_db)):
+    # 1. Buscamos al estudiante principal
+    estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
+    
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+
+    # 2. Buscamos los registros asociados usando el ID del estudiante
+    contacto = db.query(models.ContactoEstudiante).filter(models.ContactoEstudiante.estudiante_id == estudiante.id).first()
+    domicilio = db.query(models.DomicilioEstudiante).filter(models.DomicilioEstudiante.estudiante_id == estudiante.id).first()
+    datos = db.query(models.DatosEstudiante).filter(models.DatosEstudiante.estudiante_id == estudiante.id).first()
+
+    # 3. Empaquetamos todo en un solo diccionario (JSON) para que el frontend lo lea fácil
+    return {
+        "estudiante": {
+            "nombre": estudiante.nombre,
+            "apellidos": estudiante.apellidos,
+            "matricula": estudiante.matricula,
+            "grupo": estudiante.grupo,
+            "carrera": estudiante.carrera,
+            "status": estudiante.status.value if estudiante.status else None
+        },
+        "contacto": contacto,
+        "domicilio": domicilio,
+        "datos_personales": datos
+    }
