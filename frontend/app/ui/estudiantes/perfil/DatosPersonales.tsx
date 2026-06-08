@@ -4,15 +4,15 @@ import { toast } from "sonner";
 import { EstudianteInfo } from "@/app/types/estudiantes/types";
 import { useRouter } from "next/navigation";
 
-export default function DatosPersonales({isEditing, correoEstudiante, datosIniciales }: {isEditing: boolean, correoEstudiante: string, datosIniciales: EstudianteInfo }) {
+export default function DatosPersonales({ isEditing, correoEstudiante, datosIniciales }: { isEditing: boolean, correoEstudiante: string, datosIniciales: EstudianteInfo }) {
   const [campoExitoso, setCampoExitoso] = useState<string>("");
   const [datosEstudiante, setDatosEstudiante] = useState<EstudianteInfo>(datosIniciales);
   const router = useRouter();
 
-  const manejarCambio = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setDatosEstudiante(prev => ({ ...prev, [name]: value }));
-  };
+  const manejarCambio = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const { name, value } = e.target;
+  setDatosEstudiante(prev => ({ ...prev, [name]: value }));
+};
 
   const manejarGuardado = async (nombreCampo: string, valor: string) => {
     if (valor.trim() === "") {
@@ -53,8 +53,8 @@ export default function DatosPersonales({isEditing, correoEstudiante, datosInici
 
   const getInputClass = (nombreCampo: string) => {
     return `${baseInputClass} ${campoExitoso === nombreCampo
-        ? "border-green-500 bg-green-50 ring-2 ring-green-200" 
-        : "border-gray-300 focus:border-blue-500"              
+      ? "border-green-500 bg-green-50 ring-2 ring-green-200"
+      : "border-gray-300 focus:border-blue-500"
       }`;
   };
 
@@ -67,77 +67,81 @@ export default function DatosPersonales({isEditing, correoEstudiante, datosInici
       <div className="p-4 flex flex-col gap-1.5">
         <div className="flex flex-row w-full justify-between gap-3">
           <label className="flex flex-col w-1/2 text-xs gap-1.5">Nombre(s)
-            <input 
-              onChange={manejarCambio} 
-              onBlur={(e) => manejarGuardado(e.target.name, e.target.value)} 
-              value={datosEstudiante.nombre || ""} 
-              disabled={!isEditing} 
-              type="text" 
-              name="nombre" 
-              placeholder="Ana Laura" 
+            <input
+              onChange={manejarCambio}
+              onBlur={(e) => manejarGuardado(e.target.name, e.target.value)}
+              value={datosEstudiante.nombre || ""}
+              disabled={!isEditing}
+              type="text"
+              name="nombre"
+              placeholder="Ana Laura"
               className={getInputClass("nombre")}
             />
           </label>
           <label className="flex flex-col w-1/2 text-xs gap-1.5">Apellidos
-            <input 
-              onChange={manejarCambio} 
-              onBlur={(e) => manejarGuardado(e.target.name, e.target.value)} 
-              value={datosEstudiante.apellidos || ""} 
-              disabled={!isEditing} 
-              type="text" 
-              name="apellidos" // Corregido: minúscula
-              placeholder="Morales Díaz" 
-              className={getInputClass("apellidos")} // Corregido: apuntando a apellidos
+            <input
+              onChange={manejarCambio}
+              onBlur={(e) => manejarGuardado(e.target.name, e.target.value)}
+              value={datosEstudiante.apellidos || ""}
+              disabled={!isEditing}
+              type="text"
+              name="apellidos"
+              placeholder="Morales Díaz"
+              className={getInputClass("apellidos")} 
             />
           </label>
         </div>
         <div className="flex flex-row w-full justify-between gap-3">
           <label className="flex flex-col w-1/2 text-xs gap-1.5">Fecha de nacimiento
-            <input 
-              onChange={manejarCambio} 
-              onBlur={(e) => manejarGuardado(e.target.name, e.target.value)} 
-              value={datosEstudiante.fecha_nacimiento || ""} 
-              disabled={!isEditing} 
-              type="date" 
-              name="fecha_nacimiento" 
-              className={getInputClass("fecha_nacimiento")} // Corregido
+            <input
+              onChange={manejarCambio}
+              onBlur={(e) => manejarGuardado(e.target.name, e.target.value)}
+              value={datosEstudiante.fecha_nacimiento || ""}
+              disabled={!isEditing}
+              type="date"
+              name="fecha_nacimiento"
+              className={getInputClass("fecha_nacimiento")}
             />
           </label>
           <label className="flex flex-col w-1/2 text-xs gap-1.5">Género
-            <input 
-              onChange={manejarCambio} 
-              onBlur={(e) => manejarGuardado(e.target.name, e.target.value)} 
-              value={datosEstudiante.genero || ""} 
-              disabled={!isEditing} 
-              type="text" 
-              name="genero" 
-              placeholder="Femenino" 
-              className={getInputClass("genero")} // Corregido
-            />
+            <select
+              name="genero"
+              value={datosEstudiante.genero || ""}
+              onChange={manejarCambio}
+              onBlur={(e) => manejarGuardado(e.target.name, e.target.value)}
+              disabled={!isEditing}
+              className={getInputClass("genero")}
+            >
+              <option value="" disabled>Seleccionar...</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Femenino">Femenino</option>
+              <option value="No Binario">No Binario</option>
+              <option value="Otro">Otro</option>
+            </select>
           </label>
         </div>
         <label className="flex flex-col w-full text-xs gap-1.5">CURP
-          <input 
-            onChange={manejarCambio} 
-            onBlur={(e) => manejarGuardado(e.target.name, e.target.value)} 
-            value={datosEstudiante.curp || ""} 
-            disabled={!isEditing} 
-            type="text" 
-            name="curp" 
-            placeholder="MODA000815MOXRRRA1" 
-            className={getInputClass("curp")} // Corregido
+          <input
+            onChange={manejarCambio}
+            onBlur={(e) => manejarGuardado(e.target.name, e.target.value)}
+            value={datosEstudiante.curp || ""}
+            disabled={!isEditing}
+            type="text"
+            name="curp"
+            placeholder="MODA000815MOXRRRA1"
+            className={getInputClass("curp")}
           />
         </label>
         <label className="flex flex-col w-full text-xs gap-1.5">NSS (Número de Seguridad Social)
-          <input 
-            onChange={manejarCambio} 
-            onBlur={(e) => manejarGuardado(e.target.name, e.target.value)} 
-            value={datosEstudiante.nss || ""} 
-            disabled={!isEditing} 
-            type="text" 
-            name="nss" 
-            placeholder="78945612301" 
-            className={getInputClass("nss")} // Corregido
+          <input
+            onChange={manejarCambio}
+            onBlur={(e) => manejarGuardado(e.target.name, e.target.value)}
+            value={datosEstudiante.nss || ""}
+            disabled={!isEditing}
+            type="text"
+            name="nss"
+            placeholder="78945612301"
+            className={getInputClass("nss")}
           />
         </label>
       </div>

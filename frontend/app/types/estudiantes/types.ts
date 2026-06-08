@@ -6,7 +6,7 @@ interface IDomicilio {
     municipio: string;
 }
 
-export interface IContacto {
+interface IContacto {
     correo_alternativo: string;
     telefono: string;
     telefono_emergencia: string;
