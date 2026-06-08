@@ -11,7 +11,7 @@ export default function PerfilUI({ correoUsuario, datosPerfil }: PerfilUIProps) 
     const [isEditing, setIsEditing] = useState(false);
 
     const { estudiante, datos_personales, contacto, domicilio } = datosPerfil;
-
+    
     return (
         <section className="w-screen xl:max-w-5/6 overflow-y-auto">
             <header className="flex flex-row p-10 items-center justify-between border-b border-gray-400">
@@ -21,7 +21,7 @@ export default function PerfilUI({ correoUsuario, datosPerfil }: PerfilUIProps) 
                     </p>
                     <div className="flex flex-col gap-0.5">
                         <h1 className="font-semibold text-2xl md:text-[28px] mb-1">
-                            {estudiante?.nombre} {datos_personales?.apellidos || ""}
+                            {estudiante?.nombre} {estudiante?.apellidos || ""}
                         </h1>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-6 text-sm">
                             <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[18px]">badge</span>{estudiante?.matricula || "Sin Matrícula"}</span>
@@ -40,7 +40,7 @@ export default function PerfilUI({ correoUsuario, datosPerfil }: PerfilUIProps) 
             <div className="grid grid-cols-3 grid-rows-4 p-7 gap-3">
                 <DatosPersonales correoEstudiante={correoUsuario} isEditing={isEditing} datosIniciales={{
                         nombre: estudiante?.nombre || "",
-                        apellidos: datos_personales?.apellidos || "",
+                        apellidos: estudiante?.apellidos || "",
                         fecha_nacimiento: datos_personales?.fecha_nacimiento || "",
                         genero: datos_personales?.genero || "",
                         curp: datos_personales?.curp || "",
