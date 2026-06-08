@@ -5,20 +5,20 @@ export default function Page() {
             <div className="max-w-4xl mx-auto">
                 <div className="mb-10">
                     <h2 className="mb-1">
-                        Registro Inicial de Estancia
+                        Registro Inicial de Estancia    
                     </h2>
                     <p>
                         Complete la información requerida para iniciar su proceso de vinculación profesional.
                     </p>
                 </div>
 
-                <div className="rounded-xl shadow-sm border border-gray-300 p-6 mb-6 flex items-center justify-between">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-300 p-6 mb-6 flex items-center justify-between">
                     <div className="flex flex-col items-center step-active w-24">
                         <div className="w-10 h-10 rounded-full border-2 flex items-center justify-center step-icon mb-2">
                             <span className="font-semibold text-lg">1</span>
                         </div>
                         <span className="font-medium text-lg text-center text-[#1e3a8a]">
-                            Datos Personales
+                            Estudiantes
                         </span>
                     </div>
 
@@ -42,7 +42,7 @@ export default function Page() {
                 </div>
 
                 <div className="rounded-xl shadow-sm border border-gray-300 overflow-hidden">
-                    <div className="p-6 md:p-6 border-b border-gray-300">
+                    <div className="bg-white p-6 md:p-6 border-b border-gray-300">
                         <h3 className="font-semibold mb-1">
                             1. Información del Estudiante
                         </h3>
@@ -51,7 +51,7 @@ export default function Page() {
                         </p>
                     </div>
 
-                    <form className="h-full p-6 md:p-6 flex flex-col gap-6">
+                    <form className="bg-white h-full p-6 md:p-6 flex flex-col gap-6">
                         <div>
                             <h4 className="font-semibold mb-6 pb-1 border-b border-gray-300">
                                 Datos Personales
@@ -59,7 +59,7 @@ export default function Page() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Nombre(s)</label>
+                                    <label className="text-sm font-semibold">Nombre(s)</label>
                                     <input
                                         className={input_style}
                                         placeholder="Ej. Juan"
@@ -68,7 +68,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Apellidos</label>
+                                    <label className="text-sm font-semibold">Apellidos</label>
                                     <input
                                         className={input_style}
                                         placeholder="Ej. Pérez García"
@@ -77,7 +77,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Fecha de Nacimiento</label>
+                                    <label className="text-sm font-semibold">Fecha de Nacimiento</label>
                                     <input
                                         className={input_style}
                                         type="date"
@@ -85,7 +85,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Lugar de Nacimiento</label>
+                                    <label className="text-sm font-semibold">Lugar de Nacimiento</label>
                                     <input
                                         className={input_style}
                                         type="text"
@@ -93,7 +93,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Número de Seguro Social</label>
+                                    <label className="text-sm font-semibold">Número de Seguro Social</label>
                                     <input
                                         className={input_style}
                                         type="text"
@@ -101,7 +101,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Matrícula UMAR</label>
+                                    <label className="text-sm font-semibold">Matrícula UMAR</label>
                                     <input
                                         className={input_style}
                                         type="text"
@@ -109,7 +109,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Grupo</label>
+                                    <label className="text-sm font-semibold">Grupo</label>
                                     <input
                                         className={input_style}
                                         placeholder="Ej. 604"
@@ -118,7 +118,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Porcentaje de créditos</label>
+                                    <label className="text-sm font-semibold">Porcentaje de créditos</label>
                                     <input
                                         className={input_style}
                                         placeholder="Ej. 85%"
@@ -134,7 +134,7 @@ export default function Page() {
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Correo electrónico alternativo</label>
+                                    <label className="text-sm font-semibold">Correo electrónico alternativo</label>
                                     <input
                                         className={input_style}
                                         type="email"
@@ -142,7 +142,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Número de teléfono personal</label>
+                                    <label className="text-sm font-semibold">Número de teléfono personal</label>
                                     <input
                                         className={input_style}
                                         type="tel"
@@ -150,7 +150,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Número de teléfono alternativo</label>
+                                    <label className="text-sm font-semibold">Número de teléfono alternativo</label>
                                     <input
                                         className={input_style}
                                         type="tel"
@@ -165,7 +165,7 @@ export default function Page() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div className="flex flex-col gap-1 lg:col-span-2">
-                                    <label className="font-semibold">Calle y número</label>
+                                    <label className="text-sm font-semibold">Calle y número</label>
                                     <input
                                         className={input_style  }
                                         type="text"
@@ -173,7 +173,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Colonia</label>
+                                    <label className="text-sm font-semibold">Colonia</label>
                                     <input
                                         className={input_style}
                                         type="text"
@@ -181,7 +181,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Ciudad</label>
+                                    <label className="text-sm font-semibold">Ciudad</label>
                                     <input
                                         className={input_style}
                                         type="text"
@@ -189,7 +189,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Municipio</label>
+                                    <label className="text-sm font-semibold">Municipio</label>
                                     <input
                                         className={input_style}
                                         type="text"
@@ -197,7 +197,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Código Postal</label>
+                                    <label className="text-sm font-semibold">Código Postal</label>
                                     <input
                                         className={input_style}
                                         type="text"
@@ -211,7 +211,7 @@ export default function Page() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div className="flex flex-col gap-1 lg:col-span-2">
-                                    <label className="font-semibold">Calle y número</label>
+                                    <label className="text-sm font-semibold">Calle y número</label>
                                     <input
                                         className={input_style}
                                         type="text"
@@ -219,7 +219,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Colonia</label>
+                                    <label className="text-sm font-semibold">Colonia</label>
                                     <input
                                         className={input_style}
                                         type="text"
@@ -227,7 +227,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Ciudad</label>
+                                    <label className="text-sm font-semibold">Ciudad</label>
                                     <input
                                         className={input_style}
                                         type="text"
@@ -235,7 +235,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">C.P.</label>
+                                    <label className="text-sm font-semibold">C.P.</label>
                                     <input
                                         className={input_style}
                                         type="text"
@@ -243,7 +243,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Municipio</label>
+                                    <label className="text-sm font-semibold">Municipio</label>
                                     <input
                                         className={input_style}
                                         type="text"
@@ -251,7 +251,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Estado</label>
+                                    <label className="text-sm font-semibold">Estado</label>
                                     <input
                                         className={input_style}
                                         type="text"
@@ -268,7 +268,7 @@ export default function Page() {
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">¿Tienes alguna discapacidad?</label>
+                                    <label className="text-sm font-semibold">¿Tienes alguna discapacidad?</label>
                                     <select className={input_style}>
                                         <option value="no">No</option>
                                         <option value="si">Sí</option>
@@ -276,7 +276,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">¿Eres hablante de lengua indígena?</label>
+                                    <label className="text-sm font-semibold">¿Eres hablante de lengua indígena?</label>
                                     <select className={input_style}>
                                         <option value="no">No</option>
                                         <option value="si">Sí</option>
@@ -284,7 +284,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">¿Tienes hijos?</label>
+                                    <label className="text-sm font-semibold">¿Tienes hijos?</label>
                                     <select className={input_style}>
                                         <option value="no">No</option>
                                         <option value="si">Sí</option>
@@ -301,7 +301,7 @@ export default function Page() {
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Período</label>
+                                    <label className="text-sm font-semibold">Período</label>
                                     <select className={input_style}>
                                         <option value="primero">Primer periodo</option>
                                         <option value="segundo">Segundo periodo</option>
@@ -310,7 +310,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Tipo de Estancia</label>
+                                    <label className="text-sm font-semibold">Tipo de Estancia</label>
                                     <select className={input_style}>
                                         <option value="verano">Verano</option>
                                         <option value="dual">Dual</option>
@@ -318,7 +318,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label className="font-semibold">Mínimo de horas</label>
+                                    <label className="text-sm font-semibold">Mínimo de horas</label>
                                     <select className={input_style}>
                                         <option value="280">280 horas</option>
                                         <option value="560">560 horas</option>
@@ -335,13 +335,6 @@ export default function Page() {
                         </div>
 
                         <div className="flex justify-end gap-3 mt-6">
-                            <button
-                                className="px-6 py-2 rounded-lg border border-gray-600 font-medium text-[14px] hover:bg-[#e6e8ea] transition-colors"
-                                type="button"
-                            >
-                                Guardar Borrador
-                            </button>
-
                             <button
                                 className="px-6 py-2 rounded-lg bg-[#1e3a8a] text-white text-[14px] hover:opacity-90 transition-opacity flex items-center gap-2"
                                 type="button"
