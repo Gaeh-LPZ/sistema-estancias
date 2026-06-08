@@ -143,6 +143,7 @@ async def exportar_estudiantes_excel(db: Session = Depends(get_db)):
             
             datos_excel.append({
                 "Nombre": est.nombre,
+                "Apellidos": est.apellidos,
                 "Correo": est.correo,
                 "Matrícula": est.matricula,
                 "Carrera": est.carrera,
@@ -187,7 +188,7 @@ async def actualizar_perfil(correo: str, datos_parciales: dict, db: Session = De
     if not estudiante:
         raise HTTPException(status_code=404, detail="Estudiante no encontrado")
 
-    campos_principal = ["nombre", "matricula", "grupo", "carrera"]
+    campos_principal = ["nombre", "apellidos", "matricula", "grupo", "carrera"]
     campos_contacto = ["correo_alternativo", "telefono", "telefono_emergencia"]
     campos_domicilio = ["calle", "colonia", "ciudad", "municipio", "codigo_postal"]
     campos_datos = ["fecha_nacimiento", "genero", "curp", "nss"]

@@ -21,7 +21,7 @@ class DatosPersonalesUpdate(BaseModel):
 
 class EstudianteUpdate(BaseModel):
     nombre: str
-    apellido: str
+    apellidos: str
     correo: str
     matricula: str
     grupo: str
