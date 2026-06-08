@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS documentos (
     nombre_documento VARCHAR(100) NOT NULL,
     url_archivo TEXT,
     estado_documento VARCHAR(30) DEFAULT 'Pendiente',
-    estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE UNIQUE NOT NULL
+    estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE NOT NULL
 );
 
 INSERT INTO roles (rol, permisos) 
