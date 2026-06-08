@@ -10,9 +10,9 @@ export default function DatosPersonales({ isEditing, correoEstudiante, datosInic
   const router = useRouter();
 
   const manejarCambio = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-  const { name, value } = e.target;
-  setDatosEstudiante(prev => ({ ...prev, [name]: value }));
-};
+    const { name, value } = e.target;
+    setDatosEstudiante(prev => ({ ...prev, [name]: value }));
+  };
 
   const manejarGuardado = async (nombreCampo: string, valor: string) => {
     if (valor.trim() === "") {
@@ -87,7 +87,7 @@ export default function DatosPersonales({ isEditing, correoEstudiante, datosInic
               type="text"
               name="apellidos"
               placeholder="Morales Díaz"
-              className={getInputClass("apellidos")} 
+              className={getInputClass("apellidos")}
             />
           </label>
         </div>

@@ -11,7 +11,7 @@ export default function PerfilUI({ correoUsuario, datosPerfil }: PerfilUIProps) 
     const [isEditing, setIsEditing] = useState(false);
 
     const { estudiante, datos_personales, contacto, domicilio } = datosPerfil;
-    
+
     return (
         <section className="w-screen xl:max-w-5/6 overflow-y-auto">
             <header className="flex flex-row p-10 items-center justify-between border-b border-gray-400">
@@ -39,15 +39,19 @@ export default function PerfilUI({ correoUsuario, datosPerfil }: PerfilUIProps) 
 
             <div className="grid grid-cols-3 grid-rows-4 p-7 gap-3">
                 <DatosPersonales correoEstudiante={correoUsuario} isEditing={isEditing} datosIniciales={{
-                        nombre: estudiante?.nombre || "",
-                        apellidos: estudiante?.apellidos || "",
-                        fecha_nacimiento: datos_personales?.fecha_nacimiento || "",
-                        genero: datos_personales?.genero || "",
-                        curp: datos_personales?.curp || "",
-                        nss: datos_personales?.nss || ""
-                    }}/>
-                <Contacto isEditing={isEditing} />
-                <InformacionAcademica isEditing={isEditing} />
+                    nombre: estudiante?.nombre || "",
+                    apellidos: estudiante?.apellidos || "",
+                    fecha_nacimiento: datos_personales?.fecha_nacimiento || "",
+                    genero: datos_personales?.genero || "",
+                    curp: datos_personales?.curp || "",
+                    nss: datos_personales?.nss || ""
+                }} />
+                <Contacto correoUsuario={correoUsuario} isEditing={isEditing} datosPerfil={{
+                    correo_alternativo: contacto?.correo_alternativo || "",
+                    telefono: contacto?.telefono || "",
+                    telefono_emergencia: contacto?.telefono_emergencia || ""
+                }} />
+                <InformacionAcademica matricula={estudiante.matricula} grupo={estudiante.grupo} carrera={estudiante.carrera}/>
                 <Domicilio isEditing={isEditing} />
             </div>
         </section>

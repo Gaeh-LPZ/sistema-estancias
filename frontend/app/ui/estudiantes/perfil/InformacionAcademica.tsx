@@ -1,8 +1,10 @@
 interface InformacionAcademicaProps {
-    isEditing : boolean;
+    grupo: string;
+    matricula: string;
+    carrera: string;
 }
 
-export default function InformacionAcademica({ isEditing } : InformacionAcademicaProps) {
+export default function InformacionAcademica({ grupo, matricula, carrera }: InformacionAcademicaProps) {
     return (
         <div className="col-span-2 row-span-2 outline outline-gray-300 rounded-md">
             <div className="flex flex-row w-full gap-1.5 items-center p-4 bg-[#f2f4f6] border-b border-b-gray-300">
@@ -12,14 +14,32 @@ export default function InformacionAcademica({ isEditing } : InformacionAcademic
             <div className="p-4 flex flex-col gap-1.5">
                 <div className="flex flex-row w-full justify-between gap-3">
                     <label className="flex flex-col w-1/2 text-xs gap-1.5">Matrícula UMAR
-                        <input disabled={!isEditing} type="text" name="matricula" placeholder="18030245" className="placeholder:text-[14px] bg-[#f2f4f6] p-2 rounded-md outline outline-gray-300" />
+                        <input
+                            value={matricula || ""}
+                            disabled
+                            type="text"
+                            name="matricula"
+                            placeholder="18030245"
+                            className="placeholder:text-[14px] bg-[#f2f4f6] p-2 rounded-md outline outline-gray-300" />
                     </label>
                     <label className="flex flex-col w-1/2 text-xs gap-1.5">Grupo
-                        <input disabled={!isEditing} type="text" name="grupo" placeholder="901-A" className="placeholder:text-[14px] bg-[#f2f4f6] p-2 rounded-md outline outline-gray-300"/>
+                        <input
+                            disabled
+                            value={grupo}
+                            type="text"
+                            name="grupo"
+                            placeholder="901-A"
+                            className="placeholder:text-[14px] bg-[#f2f4f6] p-2 rounded-md outline outline-gray-300" />
                     </label>
                 </div>
                 <label className="flex flex-col w-full text-xs gap-1.5">Carrera
-                    <input disabled={!isEditing} type="text" name="" placeholder="Licenciatura en Economía" className="placeholder:text-[14px] bg-[#f2f4f6] p-2 rounded-md outline outline-gray-300" />
+                    <input
+                        disabled
+                        value={carrera}
+                        type="text"
+                        name="carrera"
+                        placeholder="Licenciatura en Economía"
+                        className="placeholder:text-[14px] bg-[#f2f4f6] p-2 rounded-md outline outline-gray-300" />
                 </label>
                 <div className="flex flex-col gap-1 sm:col-span-2 mt-2">
                     <label className="font-medium text-xs flex justify-between">
