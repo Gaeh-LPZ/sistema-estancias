@@ -11,6 +11,7 @@ export interface Estudiantes {
     correo: string;
     grupo: string;
     nombre: string;
+    apellidos: string;
     carrera: string;
     semestre_egresado: string;
     matricula: string;

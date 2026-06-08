@@ -67,7 +67,7 @@ export default async function TablaEstudiantes({
                                         {estudiante.nombre.charAt(0)}
                                     </div>
                                     <div>
-                                        <p className="text-[14px] font-medium">{estudiante.nombre}</p>
+                                        <p className="text-[14px] font-medium">{estudiante.nombre} {estudiante.apellidos}</p>
                                         <p className="font-medium text-xs">{estudiante.correo}</p>
                                     </div>
                                 </div>
