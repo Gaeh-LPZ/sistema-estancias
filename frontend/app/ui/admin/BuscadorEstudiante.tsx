@@ -41,9 +41,12 @@ export default function BuscadorEstudiantes() {
                     defaultValue={searchParams.get('carrera')?.toString() || 'Todas las Carreras'}
                 >
                     <option>Todas las Carreras</option>
-                    <option>Ingeniería en Software</option>
-                    <option>Administración</option>
-                    <option>Derecho</option>
+                    <option>Actuaría</option>
+                    <option>Administración Turística</option>
+                    <option>Ciencias de la comunicación</option>
+                    <option>Ciencias Marítimas</option>
+                    <option>Economía</option>
+                    <option>Relaciones Internacionales</option>
                 </select>
                 <select 
                     className="border border-gray-400 rounded-lg py-2 px-3 text-[14px] focus:outline-none focus:border-[#00236f]"
