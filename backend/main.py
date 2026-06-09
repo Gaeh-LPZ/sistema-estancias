@@ -6,6 +6,7 @@ import io
 from fastapi.responses import StreamingResponse
 from schemas import PerfilCompletoUpdate
 from datetime import date
+import numpy as np
 
 from database import engine, Base, get_db
 import models
@@ -75,11 +76,28 @@ async def cargar_estudiantes_excel(
 
         df = pd.read_excel(file.file, engine='openpyxl')
         df.columns = df.columns.str.lower()
-        
+
         columnas_esperadas = ['correo', 'nombre', 'apellidos', 'carrera', 'matricula', 'grupo', 'semestre']
         for col in columnas_esperadas:
             if col not in df.columns:
                  raise HTTPException(status_code=400, detail=f"Falta la columna: {col}")
+
+        df = df.dropna(how='all')
+
+        df['correo'] = df['correo'].astype(str).str.strip()
+
+        df = df[df['correo'].str.len() > 3]
+        df = df[df['correo'].str.lower() != 'nan']
+
+        df = df.drop_duplicates(subset=['correo'], keep='first')
+        
+        df['matricula'] = df['matricula'].astype(str).str.replace('.0', '', regex=False)
+        df['matricula'] = df['matricula'].replace(["nan", "NaN", ""], None)
+
+        df['grupo'] = df['grupo'].fillna("Sin asignar")
+        df['grupo'] = df['grupo'].replace(["nan", "NaN", "", None], "Sin asignar") # type: ignore
+
+        df = df.fillna("")
 
         nuevos_registros = 0
         for index, row in df.iterrows():
