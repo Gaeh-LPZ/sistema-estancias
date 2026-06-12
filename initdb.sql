@@ -21,13 +21,43 @@ CREATE TABLE IF NOT EXISTS estudiantes (
 );
 
 -- Información domiciliaria
-CREATE TABLE IF NOT EXISTS domicilio_estudiante (
+CREATE TABLE IF NOT EXISTS domicilio_local (
     id SERIAL PRIMARY KEY,
     calle VARCHAR(255) NOT NULL,
     colonia VARCHAR(255) NOT NULL,
     ciudad VARCHAR(255) NOT NULL,
     municipio VARCHAR(255) NOT NULL,
     codigo_postal VARCHAR(255) NOT NULL,
+    estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE  NOT NULL
+);
+
+-- Domicilio de procedencia del estudiante
+CREATE TABLE IF NOT EXISTS domicilio_procedencia (
+    id SERIAL PRIMARY KEY,
+    calle VARCHAR(255) NOT NULL,
+    colonia VARCHAR(255) NOT NULL,
+    ciudad VARCHAR(255) NOT NULL,
+    municipio VARCHAR(255) NOT NULL,
+    codigo_postal VARCHAR(50) NOT NULL,
+    estado VARCHAR(255) NOT NULL,
+    estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE NOT NULL
+);
+
+-- Información Sociodemográfica
+CREATE TABLE IF NOT EXISTS informacion_sociodemografica (
+    id SERIAL PRIMARY KEY,
+    discapacidad VARCHAR(2) NOT NULL,
+    lengua_indigena VARCHAR(2) NOT NULL,
+    hijos VARCHAR(2) NOT NULL,
+    estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE NOT NULL
+);
+
+-- Detalles de la estancia
+CREATE TABLE IF NOT EXISTS detalles_estancia (
+    id SERIAL PRIMARY KEY,
+    periodo VARCHAR(50) NOT NULL,
+    tipo_estancia VARCHAR(50) NOT NULL,
+    minimo_horas VARCHAR(50) NOT NULL,
     estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE NOT NULL
 );
 
