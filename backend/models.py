@@ -36,8 +36,8 @@ class Estudiante(Base):
     documentos: Mapped[list["Documento"]] = relationship("Documento", back_populates="estudiante")
     rol_id: Mapped[int] = mapped_column(Integer, ForeignKey("roles.id"), nullable=True)
 
-class DomicilioEstudiante(Base):
-    __tablename__ = "domicilio_estudiante"
+class DomicilioLocal(Base):
+    __tablename__ = "domicilio_local"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     calle: Mapped[str] = mapped_column(String, nullable=False)
@@ -46,6 +46,36 @@ class DomicilioEstudiante(Base):
     municipio: Mapped[str] = mapped_column(String, nullable=False)
     codigo_postal: Mapped[str] = mapped_column(String, nullable=False)
     estudiante_id: Mapped[int] = mapped_column(Integer, ForeignKey("estudiantes.id", ondelete="CASCADE"), unique=True, nullable=False)
+
+class DomicilioProcedencia(Base):
+    __tablename__ = "domicilio_procedencia"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    calle: Mapped[str] = mapped_column(String, nullable=False)
+    colonia: Mapped[str] = mapped_column(String, nullable=False)
+    ciudad: Mapped[str] = mapped_column(String, nullable=False)
+    municipio: Mapped[str] = mapped_column(String, nullable=False)
+    codigo_postal: Mapped[str] = mapped_column(String, nullable=False)
+    estado: Mapped[str] = mapped_column(String, nullable=False)
+    estudiante_id: Mapped[int] = mapped_column(Integer, ForeignKey("estudiantes.id", ondelete="CASCADE"), unique=True, nullable=False)
+
+class InformacionSociodemografica(Base):
+    __tablename__ = "informacion_sociodemografica"
+    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    discapacidad: Mapped[str] = mapped_column(String, nullable=False)
+    lengua_indigena: Mapped[str] = mapped_column(String, nullable=False)
+    hijos: Mapped[str] = mapped_column(String, nullable=False)
+    estudiante_id: Mapped[int] = mapped_column(Integer, ForeignKey("estudiantes.id", ondelete="CASCADE"), unique=True, nullable=False)
+
+class DetallesEstancia(Base):
+    __tablename__ = "detalles_estancia"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    periodo: Mapped[str] = mapped_column(String, nullable=False)
+    tipo_estancia: Mapped[str] = mapped_column(String, nullable=False)
+    minimo_horas: Mapped[str] = mapped_column(String, nullable=False)
+    estudiante_id: Mapped[int] = mapped_column(Integer, ForeignKey("estudiantes.id", ondelete="CASCADE"), nullable=False)
 
 class ContactoEstudiante(Base):
     __tablename__ = "contacto_estudiante"
@@ -77,3 +107,7 @@ class Documento(Base):
     estudiante_id = Column(Integer, ForeignKey("estudiantes.id"), nullable=False)
     
     estudiante = relationship("Estudiante", back_populates="documentos")
+
+# ================
+#   EMPRESAS
+# ================

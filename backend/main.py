@@ -208,12 +208,10 @@ async def actualizar_perfil(correo: str, datos_parciales: dict, db: Session = De
 
     campos_principal = ["nombre", "apellidos", "matricula", "grupo", "carrera"]
     campos_contacto = ["correo_alternativo", "telefono", "telefono_emergencia"]
-    campos_domicilio = ["calle", "colonia", "ciudad", "municipio", "codigo_postal"]
     campos_datos = ["fecha_nacimiento", "genero", "curp", "nss"]
 
     try:
         for clave, valor in datos_parciales.items():
-            
             # --- Tabla: Estudiante ---
             if clave in campos_principal:
                 setattr(estudiante, clave, valor)
@@ -233,20 +231,6 @@ async def actualizar_perfil(correo: str, datos_parciales: dict, db: Session = De
                     )
                     setattr(nuevo_contacto, clave, valor)
                     db.add(nuevo_contacto)
-
-            # --- Tabla: Domicilio ---
-            elif clave in campos_domicilio:
-                domicilio = db.query(models.DomicilioEstudiante).filter(models.DomicilioEstudiante.estudiante_id == estudiante.id).first()
-                if domicilio:
-                    setattr(domicilio, clave, valor)
-                else:
-                    # Rellenamos los campos obligatorios con strings vacíos
-                    nuevo_domicilio = models.DomicilioEstudiante(
-                        estudiante_id=estudiante.id,
-                        calle="", colonia="", ciudad="", municipio="", codigo_postal=""
-                    )
-                    setattr(nuevo_domicilio, clave, valor)
-                    db.add(nuevo_domicilio)
 
             # --- Tabla: Datos Personales ---
             elif clave in campos_datos:
@@ -284,7 +268,7 @@ async def obtener_perfil(correo: str, db: Session = Depends(get_db)):
 
     # 2. Buscamos los registros asociados usando el ID del estudiante
     contacto = db.query(models.ContactoEstudiante).filter(models.ContactoEstudiante.estudiante_id == estudiante.id).first()
-    domicilio = db.query(models.DomicilioEstudiante).filter(models.DomicilioEstudiante.estudiante_id == estudiante.id).first()
+    domicilio = db.query(models.DomicilioLocal).filter(models.DomicilioLocal.estudiante_id == estudiante.id).first()
     datos = db.query(models.DatosEstudiante).filter(models.DatosEstudiante.estudiante_id == estudiante.id).first()
 
     # 3. Empaquetamos todo en un solo diccionario (JSON) para que el frontend lo lea fácil
@@ -300,4 +284,159 @@ async def obtener_perfil(correo: str, db: Session = Depends(get_db)):
         "contacto": contacto,
         "domicilio": domicilio,
         "datos_personales": datos
+    }
+
+@app.patch('/api/estudiantes/estancias/{correo}')
+async def actualizar_estancia_estudiantes(correo: str, datos: dict, db: Session = Depends(get_db)):
+    estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
+    
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    datos_personales = ['nombre', 'apellidos', "matricula", "grupo", "carrera"]
+    datos_contacto = ['correo_alternativo', 'telefono', 'telefono_emergencia']
+    datos_domicilio_local = ["calle", "colonia", "ciudad", "municipio", "codigo_postal"]
+    datos_domicilio_procedencia = [
+        'procedencia_calle', 'procedencia_colonia', 'procedencia_ciudad', 
+        'procedencia_codigo_postal', 'procedencia_municipio', 'procedencia_estado'
+    ]
+    datos_sociodemograficos = ['discapacidad', 'lengua_indigena', 'hijos']
+    datos_estancia = ['periodo', 'tipo_estancia', 'minimo_horas']
+    campos_datos_estudiante = ['fecha_nacimiento', 'nss', 'curp', 'genero']
+
+    try:
+        for clave, valor in datos.items():
+            # Datos personales
+            if clave in datos_personales:
+                setattr(estudiante, clave, valor)
+
+            # Contacto
+            elif clave in datos_contacto:
+                contacto = db.query(models.ContactoEstudiante).filter(models.ContactoEstudiante.estudiante_id == estudiante.id).first()
+                if (contacto):
+                    setattr(contacto, clave, valor)
+                else:
+                    nuevo_contacto = models.ContactoEstudiante(
+                        estudiante_id=estudiante.id,
+                        correo_alternativo="",
+                        telefono="",
+                        telefono_emergencia=""
+                    )
+                    setattr(nuevo_contacto, clave, valor)
+                    db.add(nuevo_contacto)
+
+            # Domicilio Local
+            elif clave in datos_domicilio_local:
+                domicilio_local = db.query(models.DomicilioLocal).filter(models.DomicilioLocal.estudiante_id == estudiante.id).first()
+                if domicilio_local:
+                    setattr(domicilio_local, clave, valor)
+                else:
+                    nuevo_domicilio_local = models.DomicilioLocal(
+                        estudiante_id=estudiante.id,
+                        calle="",
+                        colonia="",
+                        ciudad="",
+                        municipio="",
+                        codigo_postal=""
+                    )
+                    setattr(nuevo_domicilio_local, clave, valor)
+                    db.add(nuevo_domicilio_local)
+
+            # Domicilio de Procedencia
+            elif clave in datos_domicilio_procedencia:
+                columna_real = clave.replace("procedencia_", "")
+                domicilio_procedencia = db.query(models.DomicilioProcedencia).filter(models.DomicilioProcedencia.estudiante_id == estudiante.id).first()
+                if domicilio_procedencia:
+                    setattr(domicilio_procedencia, columna_real, valor)
+                else:
+                    nuevo_domicilio_procedencia = models.DomicilioProcedencia(
+                        estudiante_id=estudiante.id,
+                        calle="",
+                        colonia="",
+                        ciudad="",
+                        municipio="",
+                        codigo_postal="",
+                        estado=""
+                    )
+                    setattr(nuevo_domicilio_procedencia, columna_real, valor)
+                    db.add(nuevo_domicilio_procedencia)
+            
+            # Información sociodemográfica
+            elif clave in datos_sociodemograficos:
+                informacion_sd = db.query(models.InformacionSociodemografica).filter(models.InformacionSociodemografica.estudiante_id == estudiante.id).first()
+                if informacion_sd:
+                    setattr(informacion_sd, clave, valor)
+                else:
+                    nueva_informacion_sd = models.InformacionSociodemografica(
+                        estudiante_id=estudiante.id,
+                        discapacidad="",
+                        lengua_indigena="",
+                        hijos=""
+                    )
+                    setattr(nueva_informacion_sd, clave, valor)
+                    db.add(nueva_informacion_sd)
+            # Información de la estancia
+            elif clave in datos_estancia:
+                detalles_estancia = db.query(models.DetallesEstancia).filter(models.DetallesEstancia.estudiante_id == estudiante.id).first()
+                if detalles_estancia:
+                    setattr(detalles_estancia, clave, valor)
+                else:
+                    nueva_estancia = models.DetallesEstancia(
+                        estudiante_id=estudiante.id,
+                        periodo="",
+                        tipo_estancia="",
+                        minimo_horas=""
+                    )
+                    setattr(nueva_estancia, clave, valor)
+                    db.add(nueva_estancia)
+
+            elif clave in campos_datos_estudiante:
+                datos_extra = db.query(models.DatosEstudiante).filter(models.DatosEstudiante.estudiante_id == estudiante.id).first()
+                if datos_extra:
+                    setattr(datos_extra, clave, valor)
+                else:
+                    nuevo_dato_extra = models.DatosEstudiante(
+                        estudiante_id=estudiante.id,
+                        fecha_nacimiento=date(2000, 1, 1), 
+                        genero="",
+                        curp="",
+                        nss=""
+                    )
+                    setattr(nuevo_dato_extra, clave, valor)
+                    db.add(nuevo_dato_extra)
+        db.commit()
+        return {"status": "success", "mensaje": "Campo actualizado correctamente"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
+    
+@app.get('/api/estudiantes/estancias/{correo}')
+async def obtener_formulario(correo: str, db: Session = Depends(get_db)):
+    estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
+
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    contacto = db.query(models.ContactoEstudiante).filter(models.ContactoEstudiante.estudiante_id == estudiante.id).first()
+    domicilio_local = db.query(models.DomicilioLocal).filter(models.DomicilioLocal.estudiante_id == estudiante.id).first()
+    domicilio_procedencia = db.query(models.DomicilioProcedencia).filter(models.DomicilioProcedencia.estudiante_id == estudiante.id).first()
+    informacion_demografica = db.query(models.InformacionSociodemografica).filter(models.InformacionSociodemografica.estudiante_id == estudiante.id).first()
+    detalles_estancia = db.query(models.DetallesEstancia).filter(models.DetallesEstancia.estudiante_id == estudiante.id).first()
+    datos_personales = db.query(models.DatosEstudiante).filter(models.DatosEstudiante.estudiante_id == estudiante.id).first()
+
+    return {
+        "estudiante": {
+            "nombre": estudiante.nombre,
+            "apellidos": estudiante.apellidos,
+            "matricula": estudiante.matricula,
+            "grupo": estudiante.grupo,
+            "carrera": estudiante.carrera,
+            "status": estudiante.status.value if estudiante.status else None
+        },
+        "contacto": contacto,
+        "domicilio_local": domicilio_local,
+        "domicilio_procedencia": domicilio_procedencia,
+        "informacion_demografica": informacion_demografica,
+        "detalles_estancia": detalles_estancia,
+        "datos_personales": datos_personales
     }
