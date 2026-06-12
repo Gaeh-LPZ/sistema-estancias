@@ -10,7 +10,7 @@ import { PerfilUIProps } from "@/app/types/estudiantes/types";
 export default function PerfilUI({ correoUsuario, datosPerfil }: PerfilUIProps) {
     const [isEditing, setIsEditing] = useState(false);
 
-    const { estudiante, datos_personales, contacto, domicilio } = datosPerfil;
+    const { estudiante, datos_personales, contacto } = datosPerfil;
 
     return (
         <section className="w-screen xl:max-w-5/6 overflow-y-auto">
