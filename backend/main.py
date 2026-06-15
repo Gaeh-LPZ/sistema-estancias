@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 import pandas as pd
 import io
 from fastapi.responses import StreamingResponse
-from schemas import PerfilCompletoUpdate
+import schemas
 from datetime import date
 import numpy as np
 
@@ -440,3 +440,45 @@ async def obtener_formulario(correo: str, db: Session = Depends(get_db)):
         "detalles_estancia": detalles_estancia,
         "datos_personales": datos_personales
     }
+
+@app.get('/api/estudiantes/empresa/{correo}')
+async def obtener_empresa(correo: str, db: Session = Depends(get_db)):
+    estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
+
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    empresa = db.query(models.Empresa).filter(models.Empresa.estudiante_id == estudiante.id).first()
+
+    return empresa if empresa else {}
+
+
+@app.patch('/api/estudiantes/empresa/{correo}')
+async def actualizar_empresa(correo: str, datos: schemas.EmpresaUpdate, db: Session = Depends(get_db)):
+    estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
+    
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    empresa = db.query(models.Empresa).filter(models.Empresa.estudiante_id == estudiante.id).first()
+    
+    if not empresa:
+        empresa = models.Empresa(estudiante_id=estudiante.id)
+        db.add(empresa)
+        db.commit()
+        db.refresh(empresa)
+
+    datos_actualizar = datos.dict(exclude_unset=True)
+
+    try:
+        for clave, valor in datos_actualizar.items():
+            setattr(empresa, clave, valor)
+            
+        db.commit()
+        db.refresh(empresa)
+        
+        return {"mensaje": "Datos de la empresa actualizados", "empresa": empresa}
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error interno al guardar: {str(e)}")
