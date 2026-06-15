@@ -88,6 +88,35 @@ CREATE TABLE IF NOT EXISTS documentos (
     estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE NOT NULL
 );
 
+-- =============================================
+--            Datos de la empresa
+-- =============================================
+CREATE TABLE IF NOT EXISTS empresa (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100),
+    area VARCHAR(100),
+    sector VARCHAR(10),
+    tamanio VARCHAR(10),
+    nivel VARCHAR(15),
+    telefono VARCHAR(20),
+    pagina_web VARCHAR(50),
+    calle VARCHAR(100),
+    colonia VARCHAR(50),
+    ciudad VARCHAR(50),
+    municipio VARCHAR(50),
+    codigo_postal VARCHAR(20),
+    estado VARCHAR(50),
+    pais VARCHAR(100),
+    nombre_asesor VARCHAR(100),
+    cargo_asesor VARCHAR(50),
+    correo_asesor VARCHAR(100),
+    nombre_titular VARCHAR(100),
+    cargo_titular VARCHAR(50),
+    correo_titular VARCHAR(100),
+    estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE UNIQUE NOT NULL
+);
+
+
 INSERT INTO roles (rol, permisos) 
 VALUES 
 (

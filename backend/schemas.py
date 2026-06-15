@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 from datetime import date
 
@@ -49,3 +51,25 @@ class PerfilCompletoUpdate(BaseModel):
     estudiante: EstudianteUpdate
     datos_personales: DatosPersonalesUpdate
     contacto: ContactoUpdate
+
+class EmpresaUpdate(BaseModel):
+    nombre: Optional[str] = None
+    area: Optional[str] = None
+    sector: Optional[str] = None
+    tamanio: Optional[str] = None
+    nivel: Optional[str] = None
+    telefono: Optional[str] = None
+    pagina_web: Optional[str] = None
+    calle: Optional[str] = None
+    colonia: Optional[str] = None
+    ciudad: Optional[str] = None
+    municipio: Optional[str] = None
+    codigo_postal: Optional[str] = None
+    estado: Optional[str] = None
+    pais: Optional[str] = None
+    nombre_asesor: Optional[str] = None
+    cargo_asesor: Optional[str] = None
+    correo_asesor: Optional[str] = None
+    nombre_titular: Optional[str] = None
+    cargo_titular: Optional[str] = None
+    correo_titular: Optional[str] = None

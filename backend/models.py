@@ -108,6 +108,31 @@ class Documento(Base):
     
     estudiante = relationship("Estudiante", back_populates="documentos")
 
-# ================
-#   EMPRESAS
-# ================
+# ===============================
+#       Datos de la empresa
+# ===============================
+class Empresa(Base):
+    __tablename__ = "empresa"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    nombre: Mapped[str] = mapped_column(String)
+    area: Mapped[str] = mapped_column(String)
+    sector: Mapped[str] = mapped_column(String)
+    tamanio: Mapped[str] = mapped_column(String)
+    nivel: Mapped[str] = mapped_column(String)
+    telefono: Mapped[str] = mapped_column(String)
+    pagina_web: Mapped[str] = mapped_column(String)
+    calle: Mapped[str] = mapped_column(String)
+    colonia: Mapped[str] = mapped_column(String)
+    ciudad: Mapped[str] = mapped_column(String)
+    municipio: Mapped[str] = mapped_column(String)
+    codigo_postal: Mapped[str] = mapped_column(String)
+    estado: Mapped[str] = mapped_column(String)
+    pais: Mapped[str] = mapped_column(String)
+    nombre_asesor: Mapped[str] = mapped_column(String)
+    cargo_asesor: Mapped[str] = mapped_column(String)
+    correo_asesor: Mapped[str] = mapped_column(String)
+    nombre_titular: Mapped[str] = mapped_column(String)
+    cargo_titular: Mapped[str] = mapped_column(String)
+    correo_titular: Mapped[str] = mapped_column(String)
+    estudiante_id: Mapped[int] = mapped_column(Integer, ForeignKey("estudiantes.id", ondelete="CASCADE"), unique=True, nullable=False)
