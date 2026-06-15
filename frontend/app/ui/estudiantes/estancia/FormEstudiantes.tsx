@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { IFormEstudiantes } from "@/app/types/estudiantes/types";
+import Link from "next/link";
 
 interface FormProps {
     correoUsuario: string;
@@ -486,12 +487,12 @@ export default function FormEstudiantes({ correoUsuario, datosIniciales }: FormP
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
-                <button
+                <Link href="/estudiantes/estancias/empresa"
                     className="px-6 py-2 rounded-lg bg-[#1e3a8a] text-white text-[14px] hover:opacity-90 transition-opacity flex items-center gap-2"
                     type="button"
                 >
                     Continuar a Empresa <span className="material-symbols-outlined text-xs">arrow_forward</span>
-                </button>
+                </Link>
             </div>
         </form>
     );
