@@ -75,6 +75,12 @@ class DetallesEstancia(Base):
     periodo: Mapped[str] = mapped_column(String, nullable=False)
     tipo_estancia: Mapped[str] = mapped_column(String, nullable=False)
     minimo_horas: Mapped[str] = mapped_column(String, nullable=False)
+    fecha_inicio: Mapped[date] = mapped_column(Date, nullable=False)
+    fecha_fin: Mapped[date] = mapped_column(Date, nullable=False)
+    horario: Mapped[str] = mapped_column(String, nullable=False)
+    proyecto: Mapped[str] = mapped_column(String, nullable=False)
+    objetivo_general: Mapped[str] = mapped_column(String, nullable=False)
+    actividades_principales: Mapped[str] = mapped_column(String, nullable=False)
     estudiante_id: Mapped[int] = mapped_column(Integer, ForeignKey("estudiantes.id", ondelete="CASCADE"), nullable=False)
 
 class ContactoEstudiante(Base):
@@ -94,6 +100,8 @@ class DatosEstudiante(Base):
     genero: Mapped[str] = mapped_column(String, nullable=False)
     curp: Mapped[str] = mapped_column(String, nullable=False)
     nss: Mapped[str] = mapped_column(String, nullable=False)
+    lugar_nacimiento: Mapped[str] = mapped_column(String, nullable=False)
+    creditos: Mapped[str] = mapped_column(String, nullable=False)
     estudiante_id: Mapped[int] = mapped_column(Integer, ForeignKey("estudiantes.id", ondelete="CASCADE"), unique=True, nullable=False)
 
 class Documento(Base):

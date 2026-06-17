@@ -206,9 +206,12 @@ async def actualizar_perfil(correo: str, datos_parciales: dict, db: Session = De
     if not estudiante:
         raise HTTPException(status_code=404, detail="Estudiante no encontrado")
 
+    contacto = db.query(models.ContactoEstudiante).filter(models.ContactoEstudiante.estudiante_id == estudiante.id).first()
+    datos = db.query(models.DatosEstudiante).filter(models.DatosEstudiante.estudiante_id == estudiante.id).first()
+
     campos_principal = ["nombre", "apellidos", "matricula", "grupo", "carrera"]
     campos_contacto = ["correo_alternativo", "telefono", "telefono_emergencia"]
-    campos_datos = ["fecha_nacimiento", "genero", "curp", "nss"]
+    campos_datos = ["fecha_nacimiento", "genero", "curp", "nss", "lugar_nacimiento", "creditos"]
 
     try:
         for clave, valor in datos_parciales.items():
@@ -218,42 +221,41 @@ async def actualizar_perfil(correo: str, datos_parciales: dict, db: Session = De
 
             # --- Tabla: Contacto ---
             elif clave in campos_contacto:
-                contacto = db.query(models.ContactoEstudiante).filter(models.ContactoEstudiante.estudiante_id == estudiante.id).first()
                 if contacto:
                     setattr(contacto, clave, valor)
                 else:
-                    # Rellenamos los campos obligatorios con strings vacíos
-                    nuevo_contacto = models.ContactoEstudiante(
+                    # Sobrescribimos la variable 'contacto' original en lugar de crear una nueva variable
+                    contacto = models.ContactoEstudiante(
                         estudiante_id=estudiante.id,
                         correo_alternativo="",
                         telefono="",
                         telefono_emergencia=""
                     )
-                    setattr(nuevo_contacto, clave, valor)
-                    db.add(nuevo_contacto)
+                    setattr(contacto, clave, valor)
+                    db.add(contacto)
 
             # --- Tabla: Datos Personales ---
             elif clave in campos_datos:
-                datos = db.query(models.DatosEstudiante).filter(models.DatosEstudiante.estudiante_id == estudiante.id).first()
+                
                 if datos:
                     setattr(datos, clave, valor)
                 else:
-                    # Rellenamos los campos obligatorios. 
-                    # Usamos una fecha por defecto (ej. 2000-01-01) para que Postgres no rechace el Date
-                    nuevo_datos = models.DatosEstudiante(
+                    # Sobrescribimos la variable 'datos' original
+                    datos = models.DatosEstudiante(
                         estudiante_id=estudiante.id,
                         fecha_nacimiento=date(2000, 1, 1), 
                         genero="",
                         curp="",
-                        nss=""
+                        nss="",
+                        lugar_nacimiento="",
+                        creditos=""
                     )
-                    setattr(nuevo_datos, clave, valor)
-                    db.add(nuevo_datos)
+                    setattr(datos, clave, valor)
+                    db.add(datos)
 
-        # Guardamos todo
+        # Guardamos todo (AQUÍ YA SOLO INTENTARÁ GUARDAR UN OBJETO)
         db.commit()
         return {"status": "success", "mensaje": "Campo actualizado correctamente"}
-
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
@@ -301,8 +303,8 @@ async def actualizar_estancia_estudiantes(correo: str, datos: dict, db: Session 
         'procedencia_codigo_postal', 'procedencia_municipio', 'procedencia_estado'
     ]
     datos_sociodemograficos = ['discapacidad', 'lengua_indigena', 'hijos']
-    datos_estancia = ['periodo', 'tipo_estancia', 'minimo_horas']
-    campos_datos_estudiante = ['fecha_nacimiento', 'nss', 'curp', 'genero']
+    datos_estancia = ['periodo', 'tipo_estancia', 'minimo_horas', 'fecha_inicio', 'fecha_fin', 'horario', 'proyecto', 'objetivo_general', 'actividades_principales']
+    campos_datos_estudiante = ['fecha_nacimiento', 'nss', 'curp', 'genero', "lugar_nacimiento", "creditos"]
 
     try:
         for clave, valor in datos.items():
@@ -385,7 +387,13 @@ async def actualizar_estancia_estudiantes(correo: str, datos: dict, db: Session 
                         estudiante_id=estudiante.id,
                         periodo="",
                         tipo_estancia="",
-                        minimo_horas=""
+                        minimo_horas="",
+                        fecha_inicio=date(2000, 1, 1),
+                        fecha_fin=date(2000, 1, 2),
+                        horario="",
+                        proyecto="",
+                        objetivo_general="",
+                        actividades_principales=""
                     )
                     setattr(nueva_estancia, clave, valor)
                     db.add(nueva_estancia)
@@ -400,7 +408,9 @@ async def actualizar_estancia_estudiantes(correo: str, datos: dict, db: Session 
                         fecha_nacimiento=date(2000, 1, 1), 
                         genero="",
                         curp="",
-                        nss=""
+                        nss="",
+                        lugar_nacimiento="",
+                        creditos=""
                     )
                     setattr(nuevo_dato_extra, clave, valor)
                     db.add(nuevo_dato_extra)

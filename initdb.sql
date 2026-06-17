@@ -55,9 +55,15 @@ CREATE TABLE IF NOT EXISTS informacion_sociodemografica (
 -- Detalles de la estancia
 CREATE TABLE IF NOT EXISTS detalles_estancia (
     id SERIAL PRIMARY KEY,
-    periodo VARCHAR(50) NOT NULL,
-    tipo_estancia VARCHAR(50) NOT NULL,
-    minimo_horas VARCHAR(50) NOT NULL,
+    periodo VARCHAR(20) NOT NULL,
+    tipo_estancia VARCHAR(20) NOT NULL,
+    minimo_horas VARCHAR(20) NOT NULL,
+    fecha_inicio DATE NOT NULL,
+    fecha_fin DATE NOT NULL,
+    horario VARCHAR(80) NOT NULL,
+    proyecto VARCHAR(50) NOT NULL,
+    objetivo_general VARCHAR(100) NOT NULL,
+    actividades_principales VARCHAR(255) NOT NULL,
     estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE NOT NULL
 );
 
@@ -77,6 +83,8 @@ CREATE TABLE IF NOT EXISTS datos_estudiante (
     genero VARCHAR(50) NOT NULL,
     curp VARCHAR(50) NOT NULL,
     nss VARCHAR(50) NOT NULL,
+    lugar_nacimiento VARCHAR(50) NOT NULL,
+    creditos VARCHAR(10),
     estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE UNIQUE NOT NULL
 );
 
