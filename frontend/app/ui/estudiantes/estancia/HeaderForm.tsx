@@ -12,7 +12,7 @@ export default function HeaderForm() {
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-300 p-6 mb-6 flex items-center justify-between">
                 <div className="flex flex-col items-center step-active w-24">
-                    <div className="w-10 h-10 rounded-full border-2 flex items-center justify-center step-icon mb-2">
+                    <div className="text-white bg-[#1e3a8a] w-10 h-10 rounded-full border-2 flex items-center justify-center step-icon mb-2">
                         <span className="font-semibold text-lg">1</span>
                     </div>
                     <span className="font-medium text-lg text-center text-[#1e3a8a]">
