@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { EstudianteInfo } from "@/app/types/estudiantes/types";
 import { useRouter } from "next/navigation";
+import { extraerDatosCurp } from "@/app/lib/actions";
 
 export default function DatosPersonales({ isEditing, correoEstudiante, datosIniciales }: { isEditing: boolean, correoEstudiante: string, datosIniciales: EstudianteInfo }) {
   const [campoExitoso, setCampoExitoso] = useState<string>("");
@@ -11,10 +12,26 @@ export default function DatosPersonales({ isEditing, correoEstudiante, datosInic
 
   const manejarCambio = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setDatosEstudiante(prev => ({ ...prev, [name]: value }));
+
+    setDatosEstudiante(prev => {
+      const nuevosDatos = { ...prev, [name]: value };
+
+      if (name === "curp") {
+        nuevosDatos[name] = value.toUpperCase();
+        if (value.length === 18) {
+          const extraidos = extraerDatosCurp(value);
+          if (extraidos) {
+            nuevosDatos.fecha_nacimiento = extraidos.fechaNacimiento;
+            toast.success("¡Fecha de nacimiento extraída de la CURP!");
+          }
+        }
+      }
+
+      return nuevosDatos;
+    });
   };
 
-  const manejarGuardado = async (nombreCampo: string, valor: string) => {
+  const manejarGuardado = async (nombreCampo: string, valor: string, datosAdicionales: Record<string, any> = {}) => {
     if (valor.trim() === "") {
       toast.error("El campo no puede estar vacío");
       return;
@@ -23,7 +40,7 @@ export default function DatosPersonales({ isEditing, correoEstudiante, datosInic
     const toastId = toast.loading(`Guardando...`);
 
     try {
-      const datosAEnviar = { [nombreCampo]: valor };
+      const datosAEnviar = { [nombreCampo]: valor, ...datosAdicionales };
 
       const response = await fetch(`http://localhost:8000/api/estudiantes/perfil/${correoEstudiante}`, {
         method: "PATCH",
@@ -95,9 +112,8 @@ export default function DatosPersonales({ isEditing, correoEstudiante, datosInic
           <label className="flex flex-col w-1/2 text-xs gap-1.5">Fecha de nacimiento
             <input
               onChange={manejarCambio}
-              onBlur={(e) => manejarGuardado(e.target.name, e.target.value)}
               value={datosEstudiante.fecha_nacimiento || ""}
-              disabled={!isEditing}
+              disabled
               type="date"
               name="fecha_nacimiento"
               className={getInputClass("fecha_nacimiento")}
@@ -123,11 +139,25 @@ export default function DatosPersonales({ isEditing, correoEstudiante, datosInic
         <label className="flex flex-col w-full text-xs gap-1.5">CURP
           <input
             onChange={manejarCambio}
-            onBlur={(e) => manejarGuardado(e.target.name, e.target.value)}
+            onBlur={(e) => {
+              const curpVal = e.target.value.toUpperCase();
+              let extras = {};
+              if (curpVal.length === 18) {
+                const extraidos = extraerDatosCurp(curpVal);
+                if (extraidos) {
+                  extras = {
+                    fecha_nacimiento: extraidos.fechaNacimiento,
+                    lugar_nacimiento: extraidos.estadoOrigen
+                  };
+                }
+              }
+              manejarGuardado(e.target.name, curpVal, extras);
+            }}
             value={datosEstudiante.curp || ""}
             disabled={!isEditing}
             type="text"
             name="curp"
+            maxLength={18}
             placeholder="MODA000815MOXRRRA1"
             className={getInputClass("curp")}
           />
