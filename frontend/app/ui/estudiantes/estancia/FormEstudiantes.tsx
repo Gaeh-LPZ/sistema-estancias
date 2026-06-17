@@ -22,7 +22,7 @@ export default function FormEstudiantes({ correoUsuario, datosIniciales }: FormP
             ...(datosIniciales?.domicilio_local || {}),
             ...(datosIniciales?.informacion_demografica || {}),
             ...(datosIniciales?.detalles_estancia || {}),
-            
+
             // Declaramos las de procedencia directamente aquí, evitando el "if"
             procedencia_calle: datosIniciales?.domicilio_procedencia?.calle || "",
             procedencia_colonia: datosIniciales?.domicilio_procedencia?.colonia || "",
@@ -32,7 +32,7 @@ export default function FormEstudiantes({ correoUsuario, datosIniciales }: FormP
             procedencia_estado: datosIniciales?.domicilio_procedencia?.estado || ""
         };
     });
-    
+
     const router = useRouter();
 
     const manejarCambio = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -118,7 +118,7 @@ export default function FormEstudiantes({ correoUsuario, datosIniciales }: FormP
                         <label className="text-sm font-semibold">Fecha de Nacimiento</label>
                         <input
                             onChange={manejarCambio}
-                            onBlur={(e) => manejarGuardado(e.target.name, e.target.value)}
+                            disabled
                             value={datosFormulario.fecha_nacimiento || ""}
                             type="date"
                             name="fecha_nacimiento"
@@ -130,6 +130,8 @@ export default function FormEstudiantes({ correoUsuario, datosIniciales }: FormP
                         <label className="text-sm font-semibold">Lugar de Nacimiento</label>
                         <input
                             onChange={manejarCambio}
+                            disabled
+                            value={datosFormulario.lugar_nacimiento}
                             className={input_style}
                             type="text"
                             name=""
@@ -176,7 +178,10 @@ export default function FormEstudiantes({ correoUsuario, datosIniciales }: FormP
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-semibold">Porcentaje de créditos</label>
                         <input
-                            className={input_style}
+                            onChange={manejarCambio}
+                            onBlur={(e) => manejarGuardado(e.target.name, e.target.value)}
+                            value={datosFormulario.creditos || ""}
+                            className={getInputClass("creditos")}
                             placeholder="Ej. 85%"
                             type="text"
                             name="creditos"
@@ -475,6 +480,83 @@ export default function FormEstudiantes({ correoUsuario, datosIniciales }: FormP
                             <option value="280">280 horas</option>
                             <option value="560">560 horas</option>
                         </select>
+                    </div>
+
+
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-semibold">Fecha de inicio</label>
+                        <input
+                            onChange={manejarCambio}
+                            onBlur={(e) => manejarGuardado(e.target.name, e.target.value)}
+                            value={datosFormulario.fecha_inicio || ""}
+                            type="date"
+                            name="fecha_inicio"
+                            className={getInputClass("fecha_inicio")} />
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-semibold">Fecha de fin</label>
+                        <input
+                            onChange={manejarCambio}
+                            onBlur={(e) => manejarGuardado(e.target.name, e.target.value)}
+                            value={datosFormulario.fecha_fin || ""}
+                            type="date"
+                            name="fecha_fin"
+                            className={getInputClass("fecha_fin")} />
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-semibold">Horario de Actividades</label>
+                        <input
+                            onChange={manejarCambio}
+                            onBlur={(e) => manejarGuardado(e.target.name, e.target.value)}
+                            value={datosFormulario.horario || ""}
+                            type="text"
+                            name="horario"
+                            placeholder="Lunes a viernes de 8:00 a 14:00"
+                            className={getInputClass("horario")} />
+                    </div>
+                </div>
+            </div>
+
+            {/* Seccion 6: Proyecto y objetivos */}
+            <div className="mt-6">
+                <h4 className="font-semibold mb-6 pb-1 border-b border-gray-400">
+                    Proyecto y Objetivos
+                </h4>
+                <div className="grid grid-cols-1 gap-6">
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-semibold">Nombre del proyecto</label>
+                        <input
+                            onChange={manejarCambio}
+                            onBlur={(e) => manejarGuardado(e.target.name, e.target.value)}
+                            value={datosFormulario.proyecto || ""}
+                            type="text"
+                            name="proyecto"
+                            placeholder="Nombre completo del proyecto a desarrollar"
+                            className={getInputClass("proyecto")} /> 
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-semibold">Objetivo General</label>
+                        <input
+                            onChange={manejarCambio}
+                            onBlur={(e) => manejarGuardado(e.target.name, e.target.value)}
+                            value={datosFormulario.objetivo_general || ""}
+                            type="text"
+                            name="objetivo_general"
+                            placeholder="Describe el objetivo general del proyecto"
+                            className={getInputClass("objetivo_general")} />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-semibold">Actividades Principales</label>
+                        <input
+                            onChange={manejarCambio}
+                            onBlur={(e) => manejarGuardado(e.target.name, e.target.value)}
+                            value={datosFormulario.actividades_principales || ""}
+                            type="text"
+                            name="actividades_principales"
+                            placeholder="Lista de actividades principales a realizar"
+                            className={getInputClass("actividades_principales")} />
                     </div>
                 </div>
             </div>
