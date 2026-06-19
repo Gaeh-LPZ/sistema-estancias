@@ -108,6 +108,32 @@ export default function DatosPersonales({ isEditing, correoEstudiante, datosInic
             />
           </label>
         </div>
+        <label className="flex flex-col w-full text-xs gap-1.5">CURP
+          <input
+            onChange={manejarCambio}
+            onBlur={(e) => {
+              const curpVal = e.target.value.toUpperCase();
+              let extras = {};
+              if (curpVal.length === 18) {
+                const extraidos = extraerDatosCurp(curpVal);
+                if (extraidos) {
+                  extras = {
+                    fecha_nacimiento: extraidos.fechaNacimiento,
+                    lugar_nacimiento: extraidos.estadoOrigen
+                  };
+                }
+              }
+              manejarGuardado(e.target.name, curpVal, extras);
+            }}
+            value={datosEstudiante.curp || ""}
+            disabled={!isEditing}
+            type="text"
+            name="curp"
+            maxLength={18}
+            placeholder="MODA000815MOXRRRA1"
+            className={getInputClass("curp")}
+          />
+        </label>
         <div className="flex flex-row w-full justify-between gap-3">
           <label className="flex flex-col w-1/2 text-xs gap-1.5">Fecha de nacimiento
             <input
@@ -136,32 +162,6 @@ export default function DatosPersonales({ isEditing, correoEstudiante, datosInic
             </select>
           </label>
         </div>
-        <label className="flex flex-col w-full text-xs gap-1.5">CURP
-          <input
-            onChange={manejarCambio}
-            onBlur={(e) => {
-              const curpVal = e.target.value.toUpperCase();
-              let extras = {};
-              if (curpVal.length === 18) {
-                const extraidos = extraerDatosCurp(curpVal);
-                if (extraidos) {
-                  extras = {
-                    fecha_nacimiento: extraidos.fechaNacimiento,
-                    lugar_nacimiento: extraidos.estadoOrigen
-                  };
-                }
-              }
-              manejarGuardado(e.target.name, curpVal, extras);
-            }}
-            value={datosEstudiante.curp || ""}
-            disabled={!isEditing}
-            type="text"
-            name="curp"
-            maxLength={18}
-            placeholder="MODA000815MOXRRRA1"
-            className={getInputClass("curp")}
-          />
-        </label>
         <label className="flex flex-col w-full text-xs gap-1.5">NSS (Número de Seguridad Social)
           <input
             onChange={manejarCambio}
