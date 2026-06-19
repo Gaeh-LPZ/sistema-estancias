@@ -333,9 +333,9 @@ export default function FormEmpresa({ correoUsuario, datosIniciales }: FormEmpre
 
                         <div className="flex justify-between gap-3 mt-6">
                             <Link href="/estudiantes/estancias" className="px-6 py-2 border border-gray-300 text-xs rounded hover:bg-[#f2f4f6] transition-colors" type="button">Atras</Link>
-                            <button className="px-6 py-2 rounded-lg bg-[#1e3a8a] text-white text-[14px] hover:opacity-90 transition-opacity flex items-center gap-2" type="button">
+                            <Link href="/estudiantes/estancias/detalles" className="px-6 py-2 rounded-lg bg-[#1e3a8a] text-white text-[14px] hover:opacity-90 transition-opacity flex items-center gap-2" type="button">
                                 Continuar a Detalles <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                            </button>
+                            </Link>
                         </div>
                     </form>
                 </div>
