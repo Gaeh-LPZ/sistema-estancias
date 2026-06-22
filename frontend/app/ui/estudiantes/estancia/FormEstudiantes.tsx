@@ -4,7 +4,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { IFormEstudiantes } from "@/app/types/estudiantes/types";
-import Link from "next/link";
 
 interface FormProps {
     correoUsuario: string;
@@ -70,6 +69,35 @@ export default function FormEstudiantes({ correoUsuario, datosIniciales }: FormP
         }
     };
 
+    // ----- LÓGICA DE VALIDACIÓN PARA CONTINUAR -----
+    const camposRequeridos = [
+        "nombre", "apellidos", "nss", "matricula", "grupo", "creditos",
+        "correo_alternativo", "telefono", "telefono_emergencia",
+        "calle", "colonia", "ciudad", "municipio", "codigo_postal",
+        "procedencia_calle", "procedencia_colonia", "procedencia_ciudad", 
+        "procedencia_codigo_postal", "procedencia_municipio", "procedencia_estado",
+        "discapacidad", "lengua_indigena", "hijos",
+        "periodo", "tipo_estancia", "minimo_horas", "fecha_inicio", "fecha_fin", "horario",
+        "proyecto", "objetivo_general", "actividades_principales"
+    ];
+
+    const manejarContinuar = () => {
+        const camposFaltantes = camposRequeridos.filter(campo => {
+            const valor = datosFormulario[campo];
+            return !valor || valor.toString().trim() === "";
+        });
+
+        if (camposFaltantes.length > 0) {
+            toast.error("Por favor, completa todos los campos antes de continuar.");
+            console.log("Campos faltantes:", camposFaltantes);
+            return;
+        }
+
+        // Si todo está lleno, redirigimos
+        router.push("/estudiantes/estancias/empresa");
+    };
+    // ------------------------------------------------
+
     const baseInputClass = 'h-10 px-3 rounded-lg border outline-none transition-colors w-full';
     const getInputClass = (nombreCampo: string) => {
         return `${baseInputClass} ${campoExitoso === nombreCampo
@@ -131,10 +159,10 @@ export default function FormEstudiantes({ correoUsuario, datosIniciales }: FormP
                         <input
                             onChange={manejarCambio}
                             disabled
-                            value={datosFormulario.lugar_nacimiento}
+                            value={datosFormulario.lugar_nacimiento || ""}
                             className={input_style}
                             type="text"
-                            name=""
+                            name="lugar_nacimiento"
                         />
                     </div>
 
@@ -569,12 +597,14 @@ export default function FormEstudiantes({ correoUsuario, datosIniciales }: FormP
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
-                <Link href="/estudiantes/estancias/empresa"
+                {/* Reemplazamos <Link> por <button> */}
+                <button 
+                    onClick={manejarContinuar}
                     className="px-6 py-2 rounded-lg bg-[#1e3a8a] text-white text-[14px] hover:opacity-90 transition-opacity flex items-center gap-2"
                     type="button"
                 >
                     Continuar a Empresa <span className="material-symbols-outlined text-xs">arrow_forward</span>
-                </Link>
+                </button>
             </div>
         </form>
     );

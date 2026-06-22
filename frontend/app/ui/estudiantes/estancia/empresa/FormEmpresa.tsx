@@ -58,6 +58,31 @@ export default function FormEmpresa({ correoUsuario, datosIniciales }: FormEmpre
         }
     };
 
+    // ----- LÓGICA DE VALIDACIÓN PARA CONTINUAR -----
+    const camposRequeridos = [
+        "nombre", "area", "calle", "colonia", "codigo_postal", "ciudad", "municipio", "estado", "pais",
+        "sector", "tamanio", "nivel",
+        "telefono", "pagina_web",
+        "nombre_titular", "cargo_titular", "correo_titular",
+        "nombre_asesor", "cargo_asesor", "correo_asesor"
+    ];
+
+    const manejarContinuar = () => {
+        const camposFaltantes = camposRequeridos.filter(campo => {
+            const valor = datosFormulario[campo];
+            return !valor || valor.toString().trim() === "";
+        });
+
+        if (camposFaltantes.length > 0) {
+            toast.error("Por favor, completa todos los campos de la empresa antes de continuar.");
+            console.log("Campos faltantes en empresa:", camposFaltantes);
+            return;
+        }
+
+        router.push("/estudiantes/estancias/detalles");
+    };
+    // ------------------------------------------------
+
     const baseInputClass = 'h-10 px-3 rounded-lg border outline-none transition-colors w-full font-normal';
     const getInputClass = (nombreCampo: string) => {
         return `${baseInputClass} ${campoExitoso === nombreCampo
@@ -149,7 +174,7 @@ export default function FormEmpresa({ correoUsuario, datosIniciales }: FormEmpre
                                         onChange={manejarCambio}
                                         onBlur={(e) => manejarGuardado(e.target.name, e.target.value)} />
                                 </label>
-                                <label className="flex flex-col gap-1 text-sm font-semibold">Código Postal {/* Corregido: antes era 'cp' */}
+                                <label className="flex flex-col gap-1 text-sm font-semibold">Código Postal
                                     <input
                                         type="text"
                                         name="codigo_postal"
@@ -332,10 +357,17 @@ export default function FormEmpresa({ correoUsuario, datosIniciales }: FormEmpre
                         </div>
 
                         <div className="flex justify-between gap-3 mt-6">
+                            {/* Mantenemos el Link de retroceso, porque ese no necesita validación */}
                             <Link href="/estudiantes/estancias" className="px-6 py-2 border border-gray-300 text-xs rounded hover:bg-[#f2f4f6] transition-colors" type="button">Atras</Link>
-                            <Link href="/estudiantes/estancias/detalles" className="px-6 py-2 rounded-lg bg-[#1e3a8a] text-white text-[14px] hover:opacity-90 transition-opacity flex items-center gap-2" type="button">
+                            
+                            {/* Reemplazamos <Link> por <button> para avanzar */}
+                            <button 
+                                onClick={manejarContinuar} 
+                                className="px-6 py-2 rounded-lg bg-[#1e3a8a] text-white text-[14px] hover:opacity-90 transition-opacity flex items-center gap-2" 
+                                type="button"
+                            >
                                 Continuar a Detalles <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                            </Link>
+                            </button>
                         </div>
                     </form>
                 </div>
