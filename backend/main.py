@@ -492,3 +492,58 @@ async def actualizar_empresa(correo: str, datos: schemas.EmpresaUpdate, db: Sess
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error interno al guardar: {str(e)}")
+
+@app.get('/api/estudiantes/detalles/{correo}')
+async def obtener_detalles_resumen(correo: str, db: Session = Depends(get_db)):
+    # 1. Buscar al estudiante base
+    estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
+    
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    # 2. Consultar las tablas relacionadas
+    contacto = db.query(models.ContactoEstudiante).filter(models.ContactoEstudiante.estudiante_id == estudiante.id).first()
+    empresa = db.query(models.Empresa).filter(models.Empresa.estudiante_id == estudiante.id).first()
+    estancia = db.query(models.DetallesEstancia).filter(models.DetallesEstancia.estudiante_id == estudiante.id).first()
+
+    # 3. Construir la ubicación concatenada de la empresa (si existe)
+    ubicacion_empresa = "Sin asignar"
+    if empresa:
+        # Filtramos campos nulos o vacíos para armar la dirección
+        partes = [empresa.calle, empresa.colonia, empresa.ciudad, empresa.estado]
+        partes_validas = [p for p in partes if p and p.strip() != ""]
+        if partes_validas:
+            ubicacion_empresa = ", ".join(partes_validas)
+            if empresa.codigo_postal:
+                ubicacion_empresa += f", C.P. {empresa.codigo_postal}"
+
+    # 4. Retornar el JSON estructurado exactamente como lo necesita tu vista Detalles.tsx
+    return {
+        "estudiante": {
+            "nombre_completo": f"{estudiante.nombre} {estudiante.apellidos}",
+            "matricula": estudiante.matricula,
+            "carrera": estudiante.carrera,
+            "semestre": estudiante.semestre_egresado,
+            "correo": estudiante.correo,
+            "telefono": contacto.telefono if contacto else "Sin registrar"
+        },
+        "empresa": {
+            "nombre": empresa.nombre if empresa else "Sin registrar",
+            "sector": empresa.sector if empresa else "Sin registrar",
+            "ubicacion": ubicacion_empresa,
+            "tutor_nombre": empresa.nombre_asesor if empresa else "Sin registrar",
+            "tutor_cargo": empresa.cargo_asesor if empresa else "Sin registrar",
+            "tutor_correo": empresa.correo_asesor if empresa else "Sin registrar",
+            "telefono": empresa.telefono if empresa else "Sin registrar"
+        },
+        "estancia": {
+            "tipo": estancia.tipo_estancia if estancia else "Sin registrar",
+            "proyecto": estancia.proyecto if estancia else "Sin registrar",
+            "objetivo": estancia.objetivo_general if estancia else "Sin registrar",
+            "actividades": estancia.actividades_principales if estancia else "Sin registrar",
+            "fecha_inicio": estancia.fecha_inicio if estancia else None,
+            "fecha_fin": estancia.fecha_fin if estancia else None,
+            "total_horas": estancia.minimo_horas if estancia else "Sin registrar",
+            "horario": estancia.horario if estancia else "Sin registrar"  # Puedes usar este campo para la "Modalidad" del UI
+        }
+    }
