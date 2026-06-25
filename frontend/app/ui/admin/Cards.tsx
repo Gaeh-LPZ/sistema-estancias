@@ -12,7 +12,7 @@ export default async function CardWrapper() {
     const totalEstudiantes = estudiantes.length;
 
     const pendientes = estudiantes.filter(
-        (est) => est.status === 'EN_REVISION' || est.status === 'En revisión'
+        (est) => est.status === 'PENDIENTE' || est.status === 'Pendiente'
     ).length;
 
     // Convenios Completados (%):

@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { Estudiantes } from "@/app/types/admin/types";
 import { useState } from "react";
 
-export default function TablaPaginada({data} : {data: Estudiantes[]}) {
+export default function TablaPaginada({ data }: { data: Estudiantes[] }) {
     const [paginaActual, setPaginaActual] = useState(1)
     const registrosPorPagina = 3;
 
@@ -68,8 +69,27 @@ export default function TablaPaginada({data} : {data: Estudiantes[]}) {
                                 </td>
                                 <td className="py-3 px-6 text-right">
                                     <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button className="px-3 py-1.5 rounded text-gray-600 hover:bg-gray-200 text-[14px] transition-colors border border-gray-300 cursor-pointer">Ver detalle</button>
-                                        <button className="px-3 py-1.5 rounded bg-[#1e3a8a] text-white hover:bg-[#00236f] text-[14px] transition-colors shadow-sm cursor-pointer">Validar</button>
+                                        <button className="px-3 py-1.5 rounded text-gray-600 hover:bg-gray-200 text-[14px] transition-colors border border-gray-300 cursor-pointer">
+                                            Ver detalle
+                                        </button>
+
+                                        {/* Condicionamos el botón de Validar basándonos en el status del estudiante */}
+                                        {estudiante.status === "Pendiente" ? (
+                                            <Link
+                                                href={`/admin/validacion/${encodeURIComponent(estudiante.correo)}`}
+                                                className="px-3 py-1.5 rounded bg-[#1e3a8a] text-white hover:bg-[#00236f] text-[14px] transition-colors shadow-sm cursor-pointer"
+                                            >
+                                                Validar
+                                            </Link>
+                                        ) : (
+                                            <button
+                                                disabled
+                                                title={estudiante.status === "Validado" ? "Ya ha sido validado" : "El estudiante aún no envía su solicitud"}
+                                                className="px-3 py-1.5 rounded bg-gray-300 text-gray-500 text-[14px] shadow-sm cursor-not-allowed"
+                                            >
+                                                Validar
+                                            </button>
+                                        )}
                                     </div>
                                 </td>
                             </tr>
@@ -82,8 +102,8 @@ export default function TablaPaginada({data} : {data: Estudiantes[]}) {
                     Mostrando del <span className="font-semibold">{indicePrimerRegistro + 1}</span> al <span className="font-semibold">{Math.min(indiceUltimoRegistro, data.length)}</span> de <span className="font-semibold">{data.length}</span> resultados
                 </span>
                 <div className="flex gap-2">
-                    <button 
-                        onClick={irPaginaAnterior} 
+                    <button
+                        onClick={irPaginaAnterior}
                         disabled={paginaActual === 1}
                         className={`px-3 py-1.5 rounded text-sm font-medium border transition-colors ${paginaActual === 1 ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
                     >
@@ -92,8 +112,8 @@ export default function TablaPaginada({data} : {data: Estudiantes[]}) {
                     <div className="flex items-center px-3 text-sm font-medium text-gray-600">
                         Página {paginaActual} de {totalPaginas}
                     </div>
-                    <button 
-                        onClick={irPaginaSiguiente} 
+                    <button
+                        onClick={irPaginaSiguiente}
                         disabled={paginaActual === totalPaginas}
                         className={`px-3 py-1.5 rounded text-sm font-medium border transition-colors ${paginaActual === totalPaginas ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
                     >
