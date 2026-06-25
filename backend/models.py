@@ -107,14 +107,12 @@ class DatosEstudiante(Base):
 class Documento(Base):
     __tablename__ = "documentos"
     
-    id = Column(Integer, primary_key=True, index=True)
-    nombre_documento = Column(String(100), nullable=False)
-    url_archivo = Column(String, nullable=True)
-    estado_documento = Column(String(30), default="Pendiente") 
-
-    estudiante_id = Column(Integer, ForeignKey("estudiantes.id"), nullable=False)
-    
-    estudiante = relationship("Estudiante", back_populates="documentos")
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    nombre_documento: Mapped[str] = mapped_column(String(100), nullable=False)
+    url_archivo: Mapped[str | None] = mapped_column(String, nullable=True)
+    estado_documento: Mapped[str] = mapped_column(String(30), default="Pendiente") 
+    estudiante_id: Mapped[int] = mapped_column(Integer, ForeignKey("estudiantes.id"), nullable=False)
+    estudiante: Mapped["Estudiante"] = relationship("Estudiante", back_populates="documentos")
 
 # ===============================
 #       Datos de la empresa

@@ -1,15 +1,18 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
-from fastapi.middleware.cors import CORSMiddleware # 1. Importar el middleware de CORS
-from sqlalchemy.orm import Session
+# Librerias utilizadas
 import pandas as pd
 import io
-from fastapi.responses import StreamingResponse
 import schemas
-from datetime import date
-import numpy as np
-
-from database import engine, Base, get_db
 import models
+
+# Funciones especificas de cada libreria
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware 
+from sqlalchemy.orm import Session
+from fastapi.responses import StreamingResponse
+from datetime import date
+from pydantic import BaseModel
+from database import get_db
+
 
 app = FastAPI()
 
@@ -547,3 +550,64 @@ async def obtener_detalles_resumen(correo: str, db: Session = Depends(get_db)):
             "horario": estancia.horario if estancia else "Sin registrar"  # Puedes usar este campo para la "Modalidad" del UI
         }
     }
+
+@app.patch('/api/estudiantes/estancias/{correo}/enviar')
+async def enviar_estancia_a_validacion(correo: str, db: Session = Depends(get_db)):
+    estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
+    
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+        
+    # Cambiamos el estado de 'En Proceso' a 'Pendiente'
+    estudiante.status = models.EstadoEstudiante.PENDIENTE
+    
+    db.commit()
+    return {"status": "success", "mensaje": "Solicitud enviada a validación correctamente"}
+
+# Esquema para recibir la acción desde el frontend
+class ValidacionRequest(BaseModel):
+    accion: str
+
+@app.patch('/api/admin/estudiantes/{correo}/validar')
+async def validar_estancia(correo: str, datos: ValidacionRequest, db: Session = Depends(get_db)):
+    estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
+    
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+
+    if datos.accion == "aprobar":
+        # 1. Cambiar estado
+        estudiante.status = models.EstadoEstudiante.VALIDADO
+        
+        # 2. Agregar el documento de "formulario_estancia"
+        doc_existente = db.query(models.Documento).filter(
+            models.Documento.estudiante_id == estudiante.id,
+            models.Documento.nombre_documento == "formulario_estancia"
+        ).first()
+
+        if doc_existente:
+            doc_existente.estado_documento = "Aprobado"
+        else:
+            nuevo_doc = models.Documento(
+                nombre_documento="formulario_estancia",
+                estado_documento="Aprobado",
+                estudiante_id=estudiante.id
+            )
+            db.add(nuevo_doc)
+
+        mensaje = "Expediente aprobado correctamente."
+        # Simulación de notificación (Aquí puedes usar fastapi-mail a futuro)
+        print(f"📧 NOTIFICACIÓN ENVIADA: Hola {estudiante.nombre}, tu solicitud de estancia ha sido APROBADA.")
+
+    elif datos.accion == "rechazar":
+        # 1. Cambiar estado a revisión
+        estudiante.status = models.EstadoEstudiante.EN_PROCESO
+        mensaje = "Expediente rechazado y enviado a revisión."
+        # Simulación de notificación
+        print(f"📧 NOTIFICACIÓN ENVIADA: Hola {estudiante.nombre}, tu solicitud fue RECHAZADA. Inicia sesión para corregirla.")
+        
+    else:
+        raise HTTPException(status_code=400, detail="Acción no válida")
+
+    db.commit()
+    return {"status": "success", "mensaje": mensaje}
