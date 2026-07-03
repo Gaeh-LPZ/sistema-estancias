@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 export default function NavBarEstudiantes(){
     const main_links = [
         { href:'/estudiantes/estancias', icon: 'assignment_ind', name: 'Datos de la estancia'},
-        { href:'#', icon: 'description', name: 'Documentos'},
+        { href:'/estudiantes/documentos', icon: 'description', name: 'Documentos'},
         { href:'/estudiantes/perfil', icon: 'account_circle', name: 'Mi perfil'}
     ]
 
