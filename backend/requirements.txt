@@ -5,3 +5,7 @@ psycopg2-binary  # El driver para conectar Python con PostgreSQL
 pandas
 openpyxl
 python-multipart
+fpdf2
+boto3
+python-multipart
+python-dotenv
