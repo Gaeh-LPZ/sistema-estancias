@@ -3,16 +3,46 @@ import pandas as pd
 import io
 import schemas
 import models
+import os
+import boto3
 
 # Funciones especificas de cada libreria
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware 
 from sqlalchemy.orm import Session
 from fastapi.responses import StreamingResponse
 from datetime import date
 from pydantic import BaseModel
 from database import get_db
+from fpdf import FPDF
+from dotenv import load_dotenv
+from botocore.client import Config
 
+load_dotenv()
+
+S3_ENDPOINT = os.getenv("S3_ENDPOINT", "http://localhost:3900")
+S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY")
+S3_SECRET_KEY = os.getenv("S3_SECRET_KEY")
+BUCKET_NAME = os.getenv("BUCKET_NAME", "expedientes-estudiantes")
+
+# 3. Inicializar el cliente de S3 (boto3)
+s3_client = boto3.client(
+    's3',
+    endpoint_url=S3_ENDPOINT,
+    aws_access_key_id=S3_ACCESS_KEY,
+    aws_secret_access_key=S3_SECRET_KEY,
+    region_name='garage'
+)
+
+s3_client_public = boto3.client(
+    's3',
+    endpoint_url="http://localhost:3900", # Dominio exacto que usa el navegador
+    aws_access_key_id=S3_ACCESS_KEY,
+    aws_secret_access_key=S3_SECRET_KEY,
+    region_name='garage',
+    config=Config(signature_version='s3v4') # Forzamos la firma correcta
+)
 
 app = FastAPI()
 
@@ -28,6 +58,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+def formatear_fecha(fecha: date):
+    meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+    return f"{fecha.day} de {meses[fecha.month - 1]} de {fecha.year}"
 
 def obtener_usuario_actual(db: Session = Depends(get_db)):
     tu_usuario = db.query(models.Estudiante).filter(models.Estudiante.correo == "lobg050328@gs.utm.mx").first()
@@ -611,3 +645,188 @@ async def validar_estancia(correo: str, datos: ValidacionRequest, db: Session = 
 
     db.commit()
     return {"status": "success", "mensaje": mensaje}
+
+@app.get('/api/estudiantes/carta-presentacion/{correo}')
+async def generar_carta_presentacion(correo: str, db: Session = Depends(get_db)):
+    estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+
+    datos_personales = db.query(models.DatosEstudiante).filter(models.DatosEstudiante.estudiante_id == estudiante.id).first()
+    empresa = db.query(models.Empresa).filter(models.Empresa.estudiante_id == estudiante.id).first()
+    estancia = db.query(models.DetallesEstancia).filter(models.DetallesEstancia.estudiante_id == estudiante.id).first()
+
+    if not empresa or not estancia or not datos_personales:
+        raise HTTPException(status_code=400, detail="Faltan datos en el expediente para generar la carta.")
+
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_margins(25, 25, 25)
+    
+    pdf.set_font("Helvetica", style="B", size=10)
+    
+    # 3. Encabezado usando new_x y new_y en lugar de ln=True
+    pdf.cell(0, 5, "ASUNTO: OFICIO DE PRESENTACIÓN", new_x="LMARGIN", new_y="NEXT", align="R")
+    pdf.cell(0, 5, "OFICIO No. 043 VAC/CEPH/UMAR/26", new_x="LMARGIN", new_y="NEXT", align="R")
+    pdf.cell(0, 5, "BAHÍAS DE HUATULCO, OAXACA", new_x="LMARGIN", new_y="NEXT", align="R")
+    pdf.ln(15)
+
+    # 4. Datos del Titular de la Empresa
+    nombre_titular = empresa.nombre_titular.upper() if empresa.nombre_titular else "A QUIEN CORRESPONDA"
+    cargo_titular = empresa.cargo_titular.upper() if empresa.cargo_titular else ""
+    nombre_empresa = empresa.nombre.upper() if empresa.nombre else ""
+    
+    pdf.cell(0, 5, nombre_titular, new_x="LMARGIN", new_y="NEXT", align="L")
+    pdf.cell(0, 5, cargo_titular, new_x="LMARGIN", new_y="NEXT", align="L")
+    pdf.cell(0, 5, nombre_empresa, new_x="LMARGIN", new_y="NEXT", align="L")
+    pdf.cell(0, 5, "PRESENTE", new_x="LMARGIN", new_y="NEXT", align="L")
+    pdf.ln(10)
+
+    # 5. Cuerpo del documento
+    pdf.set_font("Helvetica", size=11)
+    
+    fecha_inicio_str = formatear_fecha(estancia.fecha_inicio) if estancia.fecha_inicio else "N/A"
+    fecha_fin_str = formatear_fecha(estancia.fecha_fin) if estancia.fecha_fin else "N/A"
+    
+    texto_parrafo_1 = (
+        f"La Universidad del Mar, a través de la Coordinación de Estancias Profesionales, "
+        f"presenta a la C. {estudiante.nombre} {estudiante.apellidos}, egresada de la licenciatura en "
+        f"{estudiante.carrera} con número de matrícula {estudiante.matricula}, número de Seguro "
+        f"Social: {datos_personales.nss}, con la finalidad de realizar su Estancia Profesional en el área "
+        f"de {empresa.area} del {fecha_inicio_str} al {fecha_fin_str}, para cubrir un total "
+        f"de {estancia.minimo_horas} horas."
+    )
+    
+    texto_parrafo_2 = (
+        "Atentos a cualquier observación, agradecemos su valiosa colaboración, la cual "
+        "contribuye al logro de una mejor formación profesional de nuestros educandos."
+    )
+
+    pdf.multi_cell(0, 6, texto_parrafo_1, align="J")
+    pdf.ln(5)
+    pdf.multi_cell(0, 6, texto_parrafo_2, align="J")
+    pdf.ln(20)
+
+    # 6. Despedida y Firmas
+    pdf.set_font("Helvetica", style="B", size=11)
+    pdf.cell(0, 5, "Atentamente", new_x="LMARGIN", new_y="NEXT", align="C")
+    pdf.ln(20)
+    pdf.cell(0, 5, "Mtra. Jessica Margarita García Hernández", new_x="LMARGIN", new_y="NEXT", align="C")
+    pdf.set_font("Helvetica", size=10)
+    pdf.cell(0, 5, "Coordinadora de Estancias Profesionales", new_x="LMARGIN", new_y="NEXT", align="C")
+    pdf.cell(0, 5, "Universidad del Mar, Campus Huatulco", new_x="LMARGIN", new_y="NEXT", align="C")
+
+    # 7. Convertir directamente a bytes
+    pdf_bytes = bytes(pdf.output()) 
+    
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes), 
+        media_type="application/pdf", 
+        headers={"Content-Disposition": f"inline; filename=Carta_Presentacion_{estudiante.matricula}.pdf"}
+    )
+
+@app.post("/api/estudiantes/documentos/{correo}/{id_documento}")
+async def subir_documento(
+    correo: str, 
+    id_documento: str, 
+    file: UploadFile = File(...), 
+    db: Session = Depends(get_db)
+):
+    # 1. Validar que el estudiante exista
+    estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+
+    # 2. Procesar el nombre y extensión del archivo
+    extension = file.filename.split('.')[-1] if '.' in file.filename else 'pdf'
+    
+    # 3. Crear la ruta dentro del bucket (Ej: "2020040102/cv.pdf")
+    s3_key = f"{estudiante.matricula}/{id_documento}.{extension}"
+
+    try:
+        # 4. Subir el archivo a Garage S3
+        s3_client.upload_fileobj(file.file, BUCKET_NAME, s3_key)
+        
+        # 5. Generar la URL pública del archivo
+        url_archivo = f"{S3_ENDPOINT}/{BUCKET_NAME}/{s3_key}"
+
+        # 6. Actualizar o crear el registro en la base de datos
+        doc = db.query(models.Documento).filter(
+            models.Documento.estudiante_id == estudiante.id,
+            models.Documento.nombre_documento == id_documento
+        ).first()
+
+        if doc:
+            doc.url_archivo = url_archivo
+            doc.estado_documento = "Cargado"
+        else:
+            nuevo_doc = models.Documento(
+                nombre_documento=id_documento,
+                url_archivo=url_archivo,
+                estado_documento="Cargado",
+                estudiante_id=estudiante.id
+            )
+            db.add(nuevo_doc)
+
+        db.commit()
+
+        return {
+            "status": "success", 
+            "mensaje": "Archivo subido correctamente", 
+            "url": url_archivo
+        }
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error interno al subir el archivo: {str(e)}")
+    
+
+@app.get("/api/estudiantes/documentos/{correo}/{id_documento}")
+async def ver_documento(correo: str, id_documento: str, db: Session = Depends(get_db)):
+    estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+
+    doc = db.query(models.Documento).filter(
+        models.Documento.estudiante_id == estudiante.id,
+        models.Documento.nombre_documento == id_documento
+    ).first()
+
+    if not doc or not doc.url_archivo:
+        raise HTTPException(status_code=404, detail="El documento no ha sido cargado")
+
+    s3_key = doc.url_archivo.split(f"{BUCKET_NAME}/")[-1]
+
+    try:
+        # USAMOS EL CLIENTE PÚBLICO AQUÍ
+        presigned_url = s3_client_public.generate_presigned_url(
+            ClientMethod='get_object',
+            Params={'Bucket': BUCKET_NAME, 'Key': s3_key},
+            ExpiresIn=3600
+        )
+        
+        # Ya no necesitamos el replace, la URL ya viene con localhost
+        return RedirectResponse(url=presigned_url)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Error al generar el enlace seguro de S3")
+    
+@app.get("/api/estudiantes/{correo}/documentos/estados")
+async def obtener_estados_documentos(correo: str, db: Session = Depends(get_db)):
+    estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    # Buscamos todos los documentos asociados al estudiante
+    documentos = db.query(models.Documento).filter(models.Documento.estudiante_id == estudiante.id).all()
+    
+    # Formateamos la respuesta como un diccionario fácil de leer para React:
+    # { "cv": { "estado": "Cargado", "url": "..." }, "credencial": { "estado": "Validado", "url": "..." } }
+    resultado = {}
+    for doc in documentos:
+        resultado[doc.nombre_documento] = {
+            "estado": doc.estado_documento,
+            "url": doc.url_archivo
+        }
+        
+    return resultado
