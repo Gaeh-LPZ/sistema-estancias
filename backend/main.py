@@ -18,6 +18,7 @@ from database import get_db
 from fpdf import FPDF
 from dotenv import load_dotenv
 from botocore.client import Config
+from typing import Optional
 
 load_dotenv()
 
@@ -58,6 +59,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+class ActualizarEstadoDoc(BaseModel):
+    estado: str
+    motivo: Optional[str] = None
 
 def formatear_fecha(fecha: date):
     meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
@@ -830,3 +835,34 @@ async def obtener_estados_documentos(correo: str, db: Session = Depends(get_db))
         }
         
     return resultado
+
+@app.put("/api/admin/documentos/{correo}/{id_documento}/estado")
+async def cambiar_estado_documento(
+    correo: str, 
+    id_documento: str, 
+    datos: ActualizarEstadoDoc, 
+    db: Session = Depends(get_db)
+):
+    estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+
+    doc = db.query(models.Documento).filter(
+        models.Documento.estudiante_id == estudiante.id,
+        models.Documento.nombre_documento == id_documento
+    ).first()
+
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento no encontrado")
+
+    # Actualizamos el estado
+    doc.estado_documento = datos.estado
+    # Si el estado es "En Revisión" (rechazado), guardamos el motivo. Si lo aprueban, lo limpiamos.
+    if datos.estado == "En Revisión":
+        doc.motivo_rechazo = datos.motivo
+    else:
+        doc.motivo_rechazo = None
+        
+    db.commit()
+
+    return {"status": "success", "mensaje": f"Estado actualizado a {datos.estado}"}

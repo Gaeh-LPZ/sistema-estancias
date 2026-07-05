@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS estudiantes (
     semestre_egresado VARCHAR(50) NOT NULL,
     matricula VARCHAR(50) NOT NULL,
     grupo VARCHAR(50) NOT NULL,
+    motivo_rechazo VARCHAR(255),
     status estadoestudiante DEFAULT 'SIN_ENTREGAS' NOT NULL,
     rol_id INT REFERENCES roles(id) ON DELETE SET NULL
 );
@@ -93,6 +94,7 @@ CREATE TABLE IF NOT EXISTS documentos (
     nombre_documento VARCHAR(100) NOT NULL,
     url_archivo TEXT,
     estado_documento VARCHAR(30) DEFAULT 'Pendiente',
+    motivo_rechazo VARCHAR(255),
     estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE NOT NULL
 );
 

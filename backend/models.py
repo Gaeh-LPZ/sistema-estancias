@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Date
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Date, Text
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base
@@ -32,6 +32,7 @@ class Estudiante(Base):
     semestre_egresado : Mapped[str] = mapped_column(String, nullable=False)
     matricula: Mapped[str] = mapped_column(String, nullable=False)
     grupo: Mapped[str] = mapped_column(String, nullable=False)
+    motivo_rechazo: Mapped[str | None] = mapped_column(String, nullable=True)
     status: Mapped[EstadoEstudiante] = mapped_column(Enum(EstadoEstudiante), default=EstadoEstudiante.SIN_ENTREGAS, nullable=False)
     documentos: Mapped[list["Documento"]] = relationship("Documento", back_populates="estudiante")
     rol_id: Mapped[int] = mapped_column(Integer, ForeignKey("roles.id"), nullable=True)
@@ -111,6 +112,7 @@ class Documento(Base):
     nombre_documento: Mapped[str] = mapped_column(String(100), nullable=False)
     url_archivo: Mapped[str | None] = mapped_column(String, nullable=True)
     estado_documento: Mapped[str] = mapped_column(String(30), default="Pendiente") 
+    motivo_rechazo: Mapped[str | None] = mapped_column(String, nullable=True)
     estudiante_id: Mapped[int] = mapped_column(Integer, ForeignKey("estudiantes.id"), nullable=False)
     estudiante: Mapped["Estudiante"] = relationship("Estudiante", back_populates="documentos")
 
