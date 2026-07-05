@@ -69,27 +69,34 @@ export default function TablaPaginada({ data }: { data: Estudiantes[] }) {
                                 </td>
                                 <td className="py-3 px-6 text-right">
                                     <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button className="px-3 py-1.5 rounded text-gray-600 hover:bg-gray-200 text-[14px] transition-colors border border-gray-300 cursor-pointer">
-                                            Ver detalle
-                                        </button>
 
-                                        {/* Condicionamos el botón de Validar basándonos en el status del estudiante */}
-                                        {estudiante.status === "Pendiente" ? (
+                                        {/* CORRECCIÓN 1: Convertimos "Ver detalle" en un Link real */}
+                                        <Link
+                                            href={`/admin/validacion/${encodeURIComponent(estudiante.correo)}`}
+                                            className="px-3 py-1.5 rounded text-gray-600 hover:bg-gray-200 text-[14px] transition-colors border border-gray-300 cursor-pointer inline-block"
+                                        >
+                                            Ver detalle
+                                        </Link>
+
+                                        {/* CORRECCIÓN 2: Relajamos la condición. Mientras no esté "Validado", el admin puede entrar a Validar */}
+                                        {estudiante.status !== "Validado" ? (
                                             <Link
-                                                href={`/admin/validacion/${encodeURIComponent(estudiante.correo)}`}
-                                                className="px-3 py-1.5 rounded bg-[#1e3a8a] text-white hover:bg-[#00236f] text-[14px] transition-colors shadow-sm cursor-pointer"
+                                                // Opcional: Le pasamos ?doc=cv para que abra el panel de validación directo en el CV
+                                                href={`/admin/validacion/${encodeURIComponent(estudiante.correo)}?doc=cv`}
+                                                className="px-3 py-1.5 rounded bg-[#1e3a8a] text-white hover:bg-[#00236f] text-[14px] transition-colors shadow-sm cursor-pointer inline-block"
                                             >
                                                 Validar
                                             </Link>
                                         ) : (
                                             <button
                                                 disabled
-                                                title={estudiante.status === "Validado" ? "Ya ha sido validado" : "El estudiante aún no envía su solicitud"}
-                                                className="px-3 py-1.5 rounded bg-gray-300 text-gray-500 text-[14px] shadow-sm cursor-not-allowed"
+                                                title="Ya ha sido completamente validado"
+                                                className="px-3 py-1.5 rounded bg-gray-300 text-gray-500 text-[14px] shadow-sm cursor-not-allowed inline-block"
                                             >
                                                 Validar
                                             </button>
                                         )}
+
                                     </div>
                                 </td>
                             </tr>
