@@ -773,10 +773,12 @@ async def subir_documento(
             )
             db.add(nuevo_doc)
 
+        estudiante.status = "PENDIENTE"
+
         db.commit()
 
         return {
-            "status": "success", 
+            "status": "success",
             "mensaje": "Archivo subido correctamente", 
             "url": url_archivo
         }
@@ -852,12 +854,19 @@ async def cambiar_estado_documento(
         models.Documento.nombre_documento == id_documento
     ).first()
 
+    # MAGIA AQUÍ: Si el documento no existe, lo creamos
     if not doc:
-        raise HTTPException(status_code=404, detail="Documento no encontrado")
+        doc = models.Documento(
+            estudiante_id=estudiante.id,
+            nombre_documento=id_documento,
+            estado_documento=datos.estado,
+            url_archivo=None
+        )
+        db.add(doc)
+    else:
+        doc.estado_documento = datos.estado
 
-    # Actualizamos el estado
-    doc.estado_documento = datos.estado
-    # Si el estado es "En Revisión" (rechazado), guardamos el motivo. Si lo aprueban, lo limpiamos.
+    # Manejo del motivo de rechazo
     if datos.estado == "En Revisión":
         doc.motivo_rechazo = datos.motivo
     else:
@@ -866,3 +875,53 @@ async def cambiar_estado_documento(
     db.commit()
 
     return {"status": "success", "mensaje": f"Estado actualizado a {datos.estado}"}
+
+@app.post("/api/admin/documentos/{correo}/{id_documento}")
+async def admin_subir_documento(
+    correo: str, 
+    id_documento: str, 
+    file: UploadFile = File(...), 
+    db: Session = Depends(get_db)
+):
+    estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+
+    doc = db.query(models.Documento).filter(
+        models.Documento.estudiante_id == estudiante.id,
+        models.Documento.nombre_documento == id_documento
+    ).first()
+
+    # MAGIA AQUÍ: Si el documento no existe, lo pre-creamos antes de subir a S3
+    if not doc:
+        doc = models.Documento(
+            estudiante_id=estudiante.id,
+            nombre_documento=id_documento,
+            estado_documento="Pendiente",
+            url_archivo=None
+        )
+        db.add(doc)
+        db.flush() # Guarda temporalmente para poder actualizarlo abajo
+
+    file_extension = file.filename.split('.')[-1]
+    s3_key = f"{estudiante.matricula}/{id_documento}.{file_extension}"
+
+    try:
+        s3_client.upload_fileobj(
+            file.file,
+            BUCKET_NAME,
+            s3_key,
+            ExtraArgs={'ContentType': file.content_type}
+        )
+        url_archivo = f"http://localhost:3900/{BUCKET_NAME}/{s3_key}"
+        
+        # Actualizamos la base de datos
+        doc.url_archivo = url_archivo
+        doc.estado_documento = "Aprobado" # Se aprueba automáticamente
+        doc.motivo_rechazo = None
+        db.commit()
+
+        return {"status": "success", "url": url_archivo}
+    except Exception as e:
+        db.rollback() # Revertimos si S3 falla
+        raise HTTPException(status_code=500, detail=str(e))
