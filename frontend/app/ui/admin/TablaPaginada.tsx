@@ -54,10 +54,29 @@ export default function TablaPaginada({ data }: { data: Estudiantes[] }) {
                                 <td className="py-3 px-6 text-[14px] text-gray-700">{estudiante.matricula}</td>
                                 <td className="py-3 px-6 text-[14px] text-gray-700">{estudiante.carrera}</td>
                                 <td className="py-3 px-6">
-                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#d0e1fb] text-[14px] font-bold text-blue-900">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[#54647a]"></span>
-                                        {estudiante.status}
-                                    </span>
+                                    {/* Lógica condicional para los colores del badge según el estado */}
+                                    {(() => {
+                                        let bgStatus = "bg-gray-100 text-gray-700";
+                                        let dotStatus = "bg-gray-400";
+
+                                        if (estudiante.status === "En_proceso") {
+                                            bgStatus = "bg-amber-100 text-amber-900 border border-amber-200";
+                                            dotStatus = "bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.8)]";
+                                        } else if (estudiante.status === "Validado") {
+                                            bgStatus = "bg-green-100 text-green-900 border border-green-200";
+                                            dotStatus = "bg-green-500";
+                                        } else if (estudiante.status === "Pendiente") {
+                                            bgStatus = "bg-[#d0e1fb] text-blue-900 border border-blue-200";
+                                            dotStatus = "bg-[#54647a]";
+                                        }
+
+                                        return (
+                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[13px] font-bold ${bgStatus}`}>
+                                                <span className={`w-2 h-2 rounded-full ${dotStatus}`}></span>
+                                                {estudiante.status}
+                                            </span>
+                                        );
+                                    })()}
                                 </td>
                                 <td className="py-3 px-6">
                                     <div className="flex items-center gap-3 w-32">
