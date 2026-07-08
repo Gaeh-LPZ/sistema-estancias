@@ -17,10 +17,10 @@ const documentosGenerales = [
 
 // 2. Definimos los reportes semanales
 const reportesSemanales = [
-    { numero: 1, periodo: "01 Oct - 07 Oct", estado: "Pendiente" },
-    { numero: 2, periodo: "08 Oct - 14 Oct", estado: "Pendiente" },
-    { numero: 3, periodo: "15 Oct - 21 Oct", estado: "Pendiente" },
-    { numero: 4, periodo: "22 Oct - 28 Oct", estado: "Pendiente" },
+    { id: "reporte_1", numero: 1, periodo: "01 Oct - 07 Oct" },
+    { id: "reporte_2", numero: 2, periodo: "08 Oct - 14 Oct" },
+    { id: "reporte_3", numero: 3, periodo: "15 Oct - 21 Oct" },
+    { id: "reporte_4", numero: 4, periodo: "22 Oct - 28 Oct" },
 ];
 
 interface DocumentosProps {
@@ -150,8 +150,14 @@ export default function Documentos({ correoUsuario, documentosIniciales }: Docum
                                                     <span className="material-symbols-outlined text-[15px]">error</span> Rechazado
                                                 </span>
                                             )}
+                                            {/* NUEVO ESTADO: Entregado en Físico */}
+                                            {estadoActual === "Entregado en Físico" && (
+                                                <span className="px-2.5 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-medium flex items-center gap-1">
+                                                    <span className="material-symbols-outlined text-[15px]">folder_shared</span> Físico
+                                                </span>
+                                            )}
 
-                                            {/* Botón Dinámico: Subir o Visualizar */}
+                                            {/* Botón Dinámico: Subir, Visualizar o Físico */}
                                             {estadoActual === "Pendiente" || estadoActual === "En Revisión" ? (
                                                 <label className={`transition-colors px-3.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer shadow-sm ${subiendo === doc.id ? 'bg-gray-400 text-white' : 'bg-[#1e3a8a] text-white hover:bg-[#00236f]'}`}>
                                                     <span className="material-symbols-outlined text-[16px]">
@@ -160,12 +166,21 @@ export default function Documentos({ correoUsuario, documentosIniciales }: Docum
                                                     {estadoActual === "En Revisión" ? "Volver a subir" : "Subir"}
                                                     <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => manejarSubida(e, doc.id)} />
                                                 </label>
+                                            ) : estadoActual === "Entregado en Físico" ? (
+                                                // Bloque visual estático porque no hay documento digital para ver
+                                                <div 
+                                                    className="text-purple-600 p-2 rounded-full bg-purple-50 flex items-center justify-center cursor-not-allowed"
+                                                    title="Documento entregado en la oficina"
+                                                >
+                                                    <span className="material-symbols-outlined text-[20px]">inventory_2</span>
+                                                </div>
                                             ) : (
                                                 <a
                                                     href={`http://localhost:8000/api/estudiantes/documentos/${correoUsuario}/${doc.id}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="text-[#505f76] hover:text-blue-950 transition-colors p-2 rounded-full hover:bg-[#eceef0] flex items-center justify-center cursor-pointer"
+                                                    title="Previsualizar documento"
                                                 >
                                                     <span className="material-symbols-outlined">visibility</span>
                                                 </a>
@@ -179,7 +194,7 @@ export default function Documentos({ correoUsuario, documentosIniciales }: Docum
                 </div>
 
                 {/* COLUMNA DERECHA (5 cols): Carta de Presentación y Reportes Semanales */}
-                <div className="lg:col-span-5 flex flex-col gap-6">
+                <div className="lg:col-span-5 flex flex-col gap-1.5">
 
                     {/* Tarjeta Azul: Carta de Presentación Generada */}
                     <div className="bg-[#1e3a8a] text-[#90a8ff] rounded-xl p-6 shadow-sm relative overflow-hidden flex flex-col">
@@ -223,33 +238,83 @@ export default function Documentos({ correoUsuario, documentosIniciales }: Docum
 
                         <div className="flex-1 overflow-hidden">
                             <ul className="divide-y divide-gray-200">
-                                {reportesSemanales.map((rep) => (
-                                    <li
-                                        key={rep.numero}
-                                        className="p-3.5 md:px-6 md:py-3.5 flex items-center justify-between hover:bg-gray-50 transition-colors bg-[#f7f9fb]"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-9 h-9 rounded-lg bg-[#eceef0] flex items-center justify-center font-bold text-sm text-gray-700">
-                                                {rep.numero}
-                                            </div>
-                                            <div>
-                                                <p className="text-[14px] font-semibold text-gray-800">Semana {rep.numero}</p>
-                                                <p className="text-xs text-gray-500">{rep.periodo}</p>
-                                            </div>
-                                        </div>
+                                {reportesSemanales.map((rep) => {
+                                    // Leemos el estado desde nuestra base de datos igual que los otros documentos
+                                    const docInfo = estadosDocs[rep.id];
+                                    const estadoActual = docInfo?.estado || "Pendiente";
 
-                                        <div className="flex items-center gap-2.5">
-                                            <span className="px-2 py-0.5 rounded-full bg-[#e0e3e5] text-gray-700 text-xs font-medium flex items-center gap-1">
-                                                <span className="material-symbols-outlined text-[14px]">pending</span> Pendiente
-                                            </span>
+                                    return (
+                                        <li
+                                            key={rep.numero}
+                                            className="p-3.5 md:px-6 md:py-3.5 flex items-center justify-between hover:bg-gray-50 transition-colors bg-[#f7f9fb]"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-9 h-9 rounded-lg bg-[#eceef0] flex items-center justify-center font-bold text-sm text-gray-700">
+                                                    {rep.numero}
+                                                </div>
+                                                <div>
+                                                    <p className="text-[14px] font-semibold text-gray-800">Semana {rep.numero}</p>
+                                                    <p className="text-xs text-gray-500">{rep.periodo}</p>
+                                                </div>
+                                            </div>
 
-                                            <label className="bg-[#1e3a8a] text-white hover:bg-[#00236f] transition-colors px-3 py-1 rounded text-xs font-medium flex items-center gap-1 cursor-pointer shadow-sm">
-                                                <span className="material-symbols-outlined text-[14px]">upload</span> Subir
-                                                <input type="file" className="hidden" accept=".pdf" />
-                                            </label>
-                                        </div>
-                                    </li>
-                                ))}
+                                            <div className="flex items-center gap-2.5">
+                                                {/* Badge de Estado */}
+                                                {estadoActual === "Pendiente" && (
+                                                    <span className="px-2 py-0.5 rounded-full bg-[#e0e3e5] text-gray-700 text-xs font-medium flex items-center gap-1">
+                                                        <span className="material-symbols-outlined text-[14px]">pending</span> Pendiente
+                                                    </span>
+                                                )}
+                                                {estadoActual === "Cargado" && (
+                                                    <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-medium flex items-center gap-1">
+                                                        <span className="material-symbols-outlined text-[14px]">hourglass_empty</span> Cargado
+                                                    </span>
+                                                )}
+                                                {estadoActual === "Aprobado" && (
+                                                    <span className="px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-xs font-medium flex items-center gap-1">
+                                                        <span className="material-symbols-outlined text-[14px]">check_circle</span> Aprobado
+                                                    </span>
+                                                )}
+                                                {estadoActual === "En Revisión" && (
+                                                    <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-xs font-medium flex items-center gap-1">
+                                                        <span className="material-symbols-outlined text-[14px]">error</span> Rechazado
+                                                    </span>
+                                                )}
+                                                {estadoActual === "Entregado en Físico" && (
+                                                    <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-xs font-medium flex items-center gap-1">
+                                                        <span className="material-symbols-outlined text-[14px]">folder_shared</span> Físico
+                                                    </span>
+                                                )}
+
+                                                {/* Botón Dinámico */}
+                                                {estadoActual === "Pendiente" || estadoActual === "En Revisión" ? (
+                                                    <label className={`transition-colors px-3 py-1 rounded text-xs font-medium flex items-center gap-1 cursor-pointer shadow-sm ${subiendo === rep.id ? 'bg-gray-400 text-white' : 'bg-[#1e3a8a] text-white hover:bg-[#00236f]'}`}>
+                                                        <span className="material-symbols-outlined text-[14px]">
+                                                            {subiendo === rep.id ? 'hourglass_empty' : 'upload'}
+                                                        </span>
+                                                        {estadoActual === "En Revisión" ? "Re-subir" : "Subir"}
+                                                        {/* Al cambiar, llama a manejarSubida con el id del reporte */}
+                                                        <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" disabled={subiendo !== null} onChange={(e) => manejarSubida(e, rep.id)} />
+                                                    </label>
+                                                ) : estadoActual === "Entregado en Físico" ? (
+                                                    <div className="text-purple-600 p-1.5 rounded-full bg-purple-50 flex items-center justify-center cursor-not-allowed" title="Entregado en oficina">
+                                                        <span className="material-symbols-outlined text-[18px]">inventory_2</span>
+                                                    </div>
+                                                ) : (
+                                                    <a
+                                                        href={`http://localhost:8000/api/estudiantes/documentos/${correoUsuario}/${rep.id}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-[#505f76] hover:text-blue-950 transition-colors p-1.5 rounded-full hover:bg-[#eceef0] flex items-center justify-center cursor-pointer"
+                                                        title="Previsualizar reporte"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[18px]">visibility</span>
+                                                    </a>
+                                                )}
+                                            </div>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </div>
                     </div>
