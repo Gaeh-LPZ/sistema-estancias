@@ -40,7 +40,11 @@ export default async function Page({ params }: { params: Promise<{ correo: strin
         { id: "aceptacion", nombre: "Carta de Aceptación" },
         { id: "informe", nombre: "Informe Final" },
         { id: "evaluacion", nombre: "Evaluación Control Final" },
-        { id: "liberacion", nombre: "Carta de Liberación" }
+        { id: "liberacion", nombre: "Carta de Liberación" },
+        { id: "reporte_1", nombre: "Reporte Semanal 1" },
+        { id: "reporte_2", nombre: "Reporte Semanal 2" },
+        { id: "reporte_3", nombre: "Reporte Semanal 3" },
+        { id: "reporte_4", nombre: "Reporte Semanal 4" }
     ];
 
     const documentosFormateados = listaOficial.map(doc => ({
