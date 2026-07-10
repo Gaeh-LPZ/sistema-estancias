@@ -54,26 +54,33 @@ export default function TablaPaginada({ data }: { data: Estudiantes[] }) {
                                 <td className="py-3 px-6 text-[14px] text-gray-700">{estudiante.matricula}</td>
                                 <td className="py-3 px-6 text-[14px] text-gray-700">{estudiante.carrera}</td>
                                 <td className="py-3 px-6">
-                                    {/* Lógica condicional para los colores del badge según el estado */}
                                     {(() => {
                                         let bgStatus = "bg-gray-100 text-gray-700";
                                         let dotStatus = "bg-gray-400";
 
-                                        if (estudiante.status === "En_proceso") {
+                                        if (estudiante.status === "PENDIENTE") {
+                                            // Llama la atención del admin: hay cosas por revisar
                                             bgStatus = "bg-amber-100 text-amber-900 border border-amber-200";
                                             dotStatus = "bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.8)]";
-                                        } else if (estudiante.status === "Validado") {
+                                        } else if (estudiante.status === "VALIDADO") {
+                                            // Todo terminado y aprobado
                                             bgStatus = "bg-green-100 text-green-900 border border-green-200";
                                             dotStatus = "bg-green-500";
-                                        } else if (estudiante.status === "Pendiente") {
+                                        } else if (estudiante.status === "EN_PROCESO") {
+                                            // El admin no tiene tareas, pero el alumno no ha terminado
                                             bgStatus = "bg-[#d0e1fb] text-blue-900 border border-blue-200";
                                             dotStatus = "bg-[#54647a]";
+                                        } else if (estudiante.status === "SIN_ENTREGAS") {
+                                            // Estado inicial
+                                            bgStatus = "bg-gray-100 text-gray-600 border border-gray-200";
+                                            dotStatus = "bg-gray-400";
                                         }
 
                                         return (
                                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[13px] font-bold ${bgStatus}`}>
                                                 <span className={`w-2 h-2 rounded-full ${dotStatus}`}></span>
-                                                {estudiante.status}
+                                                {/* Reemplazamos los guiones bajos por espacios para que se vea bonito */}
+                                                {estudiante.status.replace('_', ' ')}
                                             </span>
                                         );
                                     })()}
