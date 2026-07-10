@@ -13,6 +13,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
     }),
   ],
+  basePath: "/estancias/api/auth",
+  trustHost: true,
+  cookies: {
+    csrfToken: {
+      name: "next-auth.csrf-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/", // ¡Esto es clave!
+        secure: true,
+      },
+    },
+    sessionToken: {
+      name: "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/", // ¡Esto es clave!
+        secure: true,
+      },
+    },
+  },
   secret: process.env.AUTH_SECRET,
   pages: {
     signIn: '/sign-in', 
