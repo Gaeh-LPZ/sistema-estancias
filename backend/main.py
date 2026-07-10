@@ -50,6 +50,7 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://horario.utm.mx",
 ]
 
 app.add_middleware(
@@ -94,6 +95,30 @@ def requerir_permiso(permiso_necesario: str):
             )
         return usuario
     return verificador
+
+def actualizar_status_global_estudiante(estudiante, db: Session):
+    # 1. Buscamos si hay algún documento que el admin aún necesite revisar (Cargado)
+    docs_pendientes_revision = db.query(models.Documento).filter(
+        models.Documento.estudiante_id == estudiante.id,
+        models.Documento.estado_documento == "Cargado"
+    ).count()
+
+    if docs_pendientes_revision > 0:
+        # Si hay algo que revisar, el estado del estudiante es PENDIENTE (para el admin)
+        estudiante.status = "PENDIENTE"
+    else:
+        # 2. Si el admin ya revisó todo lo de la bandeja, contamos los aprobados
+        docs_aprobados = db.query(models.Documento).filter(
+            models.Documento.estudiante_id == estudiante.id,
+            models.Documento.estado_documento.in_(["Aprobado", "Entregado en Físico"])
+        ).count()
+        
+        # Meta: 7 documentos generales + 4 reportes = 11 documentos
+        if docs_aprobados >= 11:
+            estudiante.status = "VALIDADO"
+        else:
+            # Si no hay nada que revisar, pero no ha llegado a 11, sigue EN_PROCESO
+            estudiante.status = "EN_PROCESO"
 
 @app.post("/api/estudiantes/cargar-excel")
 async def cargar_estudiantes_excel(
