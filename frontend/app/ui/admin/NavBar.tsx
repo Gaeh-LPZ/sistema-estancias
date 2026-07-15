@@ -6,8 +6,7 @@ import { usePathname } from "next/navigation";
 
 const links = [
     { href: '/admin', icon: 'dashboard', name: 'Dashboard' },
-    { href: '/admin/estudiantes', icon: 'group', name: 'Estudiantes' },
-    { href: '#', icon: 'analytics', name: 'Reportes' }
+    { href: '/admin/estudiantes', icon: 'group', name: 'Estudiantes' }
 ]
 
 export default function NavBarAdmin() {
