@@ -126,6 +126,15 @@ CREATE TABLE IF NOT EXISTS empresa (
     estudiante_id INT REFERENCES estudiantes(id) ON DELETE CASCADE UNIQUE NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS administradores(
+    id SERIAL PRIMARY KEY NOT NULL,
+    nombre VARCHAR(150) NOT NULL,
+    correo VARCHAR(150) UNIQUE NOT NULL,
+    contrasena VARCHAR(255) NOT NULL,
+    -- Cambiamos VARCHAR a BOOLEAN y establecemos el valor por defecto como TRUE
+    estado BOOLEAN DEFAULT TRUE NOT NULL,
+    rol_id INT REFERENCES roles(id) NOT NULL
+);
 
 INSERT INTO roles (rol, permisos) 
 VALUES 
