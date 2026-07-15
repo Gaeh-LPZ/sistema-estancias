@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Date, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Date, Text, Boolean
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base
@@ -144,3 +144,15 @@ class Empresa(Base):
     cargo_titular: Mapped[str] = mapped_column(String)
     correo_titular: Mapped[str] = mapped_column(String)
     estudiante_id: Mapped[int] = mapped_column(Integer, ForeignKey("estudiantes.id", ondelete="CASCADE"), unique=True, nullable=False)
+
+class Administrador(Base):
+    __tablename__ = "administradores"
+    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    nombre: Mapped[str] = mapped_column(String(150), nullable=False)
+    correo: Mapped[str] = mapped_column(String(150), unique=True, index=True, nullable=False)
+    contrasena: Mapped[str] = mapped_column(String(255), nullable=False)
+    estado: Mapped[bool] = mapped_column(default=True, nullable=False) # True = Activo, False = Inactivo
+    
+    # Llave foránea para aprovechar tu sistema de roles existente
+    rol_id: Mapped[int] = mapped_column(Integer, ForeignKey("roles.id"), nullable=True)

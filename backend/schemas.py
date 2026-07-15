@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import date
 
 class DomicilioLocalUpdate(BaseModel):
@@ -73,3 +73,25 @@ class EmpresaUpdate(BaseModel):
     nombre_titular: Optional[str] = None
     cargo_titular: Optional[str] = None
     correo_titular: Optional[str] = None
+
+class AdministradorBase(BaseModel):
+    nombre: str
+    correo: EmailStr
+    estado: bool = True
+    rol_id: Optional[int] = None
+
+class AdministradorCreate(AdministradorBase):
+    contrasena: str # Requerida al crear, debe ser encriptada antes de guardar
+
+class AdministradorUpdate(BaseModel):
+    nombre: Optional[str] = None
+    correo: Optional[EmailStr] = None
+    contrasena: Optional[str] = None
+    estado: Optional[bool] = None
+    rol_id: Optional[int] = None
+
+class AdministradorResponse(AdministradorBase):
+    id: int
+
+    class Config:
+        from_attributes = True
