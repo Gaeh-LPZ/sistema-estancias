@@ -7,7 +7,7 @@ import os
 import boto3
 
 # Funciones especificas de cada libreria
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, status
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware 
 from sqlalchemy.orm import Session
@@ -19,6 +19,8 @@ from fpdf import FPDF
 from dotenv import load_dotenv
 from botocore.client import Config
 from typing import Optional
+from sqlalchemy import func
+from passlib.context import CryptContext
 
 load_dotenv()
 
@@ -50,7 +52,6 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://horario.utm.mx",
 ]
 
 app.add_middleware(
@@ -64,6 +65,11 @@ app.add_middleware(
 class ActualizarEstadoDoc(BaseModel):
     estado: str
     motivo: Optional[str] = None
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password[:72])
 
 def formatear_fecha(fecha: date):
     meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
@@ -95,30 +101,6 @@ def requerir_permiso(permiso_necesario: str):
             )
         return usuario
     return verificador
-
-def actualizar_status_global_estudiante(estudiante, db: Session):
-    # 1. Buscamos si hay algún documento que el admin aún necesite revisar (Cargado)
-    docs_pendientes_revision = db.query(models.Documento).filter(
-        models.Documento.estudiante_id == estudiante.id,
-        models.Documento.estado_documento == "Cargado"
-    ).count()
-
-    if docs_pendientes_revision > 0:
-        # Si hay algo que revisar, el estado del estudiante es PENDIENTE (para el admin)
-        estudiante.status = "PENDIENTE"
-    else:
-        # 2. Si el admin ya revisó todo lo de la bandeja, contamos los aprobados
-        docs_aprobados = db.query(models.Documento).filter(
-            models.Documento.estudiante_id == estudiante.id,
-            models.Documento.estado_documento.in_(["Aprobado", "Entregado en Físico"])
-        ).count()
-        
-        # Meta: 7 documentos generales + 4 reportes = 11 documentos
-        if docs_aprobados >= 11:
-            estudiante.status = "VALIDADO"
-        else:
-            # Si no hay nada que revisar, pero no ha llegado a 11, sigue EN_PROCESO
-            estudiante.status = "EN_PROCESO"
 
 @app.post("/api/estudiantes/cargar-excel")
 async def cargar_estudiantes_excel(
@@ -950,3 +932,110 @@ async def admin_subir_documento(
     except Exception as e:
         db.rollback() # Revertimos si S3 falla
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get('/api/admin/estadisticas/progreso')
+def obtener_progreso_documentos(db: Session = Depends(get_db)):
+    # Definimos los documentos clave en el ciclo de vida de la estancia
+    documentos_clave = [
+        "Solicitud Recibida", 
+        "Plan de Trabajo", 
+        "Reporte Parcial 1", 
+        "Informe Final", 
+        "Oficio de Terminación"
+    ]
+    
+    resultados = []
+    for doc in documentos_clave:
+        # Consideramos que un alumno pasó la etapa si su documento ya tiene un archivo subido
+        cantidad = db.query(models.Documento).filter(
+            models.Documento.nombre_documento == doc,
+            models.Documento.url_archivo != None
+        ).count()
+        resultados.append({"etapa": doc, "alumnos": cantidad})
+        
+    return resultados
+
+@app.get('/api/admin/estadisticas/sectores')
+def obtener_sectores_empresa(db: Session = Depends(get_db)):
+    # Agrupamos las empresas por su sector y contamos cuántas hay de cada uno
+    sectores = db.query(
+        models.Empresa.sector, 
+        func.count(models.Empresa.id)
+    ).group_by(models.Empresa.sector).all()
+    
+    # Formateamos directo para Recharts: [{name: 'Privado', value: 10}, ...]
+    return [{"name": sector, "value": total} for sector, total in sectores if sector]
+
+@app.get('/api/admin/estadisticas/demografia')
+def obtener_demografia(db: Session = Depends(get_db)):
+    # Hacemos un JOIN entre estudiantes y datos_estudiante para cruzar Carrera y Género
+    resultados = db.query(
+        models.Estudiante.carrera,
+        models.DatosEstudiante.genero,
+        func.count(models.Estudiante.id)
+    ).join(
+        models.DatosEstudiante, 
+        models.Estudiante.id == models.DatosEstudiante.estudiante_id
+    ).group_by(models.Estudiante.carrera, models.DatosEstudiante.genero).all()
+    
+    data_dict = {}
+    for carrera, genero, total in resultados:
+        if carrera not in data_dict:
+            data_dict[carrera] = {"carrera": carrera, "Mujeres": 0, "Hombres": 0}
+            
+        # Agrupamos dependiendo de cómo se esté guardando en la BD
+        if genero and genero.lower() in ["mujer", "femenino", "f"]:
+            data_dict[carrera]["Mujeres"] = total
+        else:
+            data_dict[carrera]["Hombres"] = total
+            
+    return list(data_dict.values())
+
+@app.post(
+    "/api/admin/administradores", 
+    response_model=schemas.AdministradorResponse, 
+    status_code=status.HTTP_201_CREATED,
+    tags=["Administradores"]
+)
+def crear_administrador(
+    admin_data: schemas.AdministradorCreate, 
+    db: Session = Depends(get_db)
+    # Puedes descomentar la siguiente línea si deseas proteger la ruta con tus permisos:
+    # usuario_verificado = Depends(requerir_permiso("CREAR_ADMIN"))
+):
+    # 1. Validar que el correo no esté en uso
+    admin_existente = db.query(models.Administrador).filter(
+        models.Administrador.correo == admin_data.correo
+    ).first()
+    
+    if admin_existente:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="El correo electrónico ya está registrado."
+        )
+    
+    # 2. Generar el hash de la contraseña
+    hashed_password = get_password_hash(admin_data.contrasena)
+    
+    # 3. Crear el nuevo registro usando el modelo
+    nuevo_admin = models.Administrador(
+        nombre=admin_data.nombre,
+        correo=admin_data.correo,
+        contrasena=hashed_password,
+        estado=admin_data.estado,
+        rol_id=admin_data.rol_id
+    )
+    
+    # 4. Insertar y confirmar en la base de datos
+    db.add(nuevo_admin)
+    db.commit()
+    db.refresh(nuevo_admin)
+    
+    # Al retornar la instancia, FastAPI y Pydantic filtrarán la contraseña 
+    # gracias a que especificamos response_model=schemas.AdministradorResponse
+    return nuevo_admin
+
+@app.get("/api/admin/administradores", response_model=list[schemas.AdministradorResponse], tags=["Administradores"])
+def listar_administradores(db: Session = Depends(get_db)):
+    # Traemos todos los registros de la tabla administradores
+    return db.query(models.Administrador).all()
