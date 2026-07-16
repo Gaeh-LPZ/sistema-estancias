@@ -52,6 +52,7 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://horario.utm.mx"
 ]
 
 app.add_middleware(
@@ -61,6 +62,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+class LoginSchema(BaseModel):
+    correo: str
+    password: str
 
 class ActualizarEstadoDoc(BaseModel):
     estado: str
@@ -241,12 +246,19 @@ async def exportar_estudiantes_excel(db: Session = Depends(get_db)):
     
 @app.get('/api/usuarios/rol')
 async def obtener_rol_usuario(correo: str, db: Session = Depends(get_db)):
+    # 1. Buscar en estudiantes
     estudiante = db.query(models.Estudiante).filter(models.Estudiante.correo == correo).first()
-    if not estudiante or not estudiante.rol_id:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado o sin rol")
+    if estudiante and estudiante.rol_id:
+        rol = db.query(models.Rol).filter(models.Rol.id == estudiante.rol_id).first()
+        return {"rol": rol.rol}
         
-    rol = db.query(models.Rol).filter(models.Rol.id == estudiante.rol_id).first()
-    return {"rol": rol.rol} # type: ignore
+    # 2. Buscar en administradores (¡ESTO ES LO QUE FALTA SI DA 404!)
+    admin = db.query(models.Administrador).filter(models.Administrador.correo == correo).first()
+    if admin and admin.rol_id:
+        rol = db.query(models.Rol).filter(models.Rol.id == admin.rol_id).first()
+        return {"rol": rol.rol}
+        
+    raise HTTPException(status_code=404, detail="Usuario no encontrado o sin rol")
 
 @app.patch('/api/estudiantes/perfil/{correo}')
 async def actualizar_perfil(correo: str, datos_parciales: dict, db: Session = Depends(get_db)):
@@ -1039,3 +1051,20 @@ def crear_administrador(
 def listar_administradores(db: Session = Depends(get_db)):
     # Traemos todos los registros de la tabla administradores
     return db.query(models.Administrador).all()
+
+@app.post("/api/admin/login", tags=["Administradores"])
+def login_administrador(data: LoginSchema, db: Session = Depends(get_db)):
+    # Buscamos al administrador por correo
+    admin = db.query(models.Administrador).filter(models.Administrador.correo == data.correo).first()
+    if not admin:
+        raise HTTPException(status_code=400, detail="Credenciales incorrectas")
+        
+    # Verificamos la contraseña (recuerda truncar a 72 por consistencia con bcrypt)
+    if not pwd_context.verify(data.password[:72], admin.contrasena):
+        raise HTTPException(status_code=400, detail="Credenciales incorrectas")
+        
+    if not admin.estado:
+        raise HTTPException(status_code=400, detail="El administrador se encuentra inactivo")
+        
+    # Retornamos las propiedades estándar que NextAuth espera (id, name, email)
+    return {"id": str(admin.id), "name": admin.nombre, "email": admin.correo}
