@@ -4,6 +4,7 @@ import ModalAgregarAdmin from '@/app/ui/admin/ModalAgregarAdmin';
 import ProgresoTramites from '@/app/ui/admin/ProgresoTramites';
 import SectorEmpresas from '@/app/ui/admin/SectorEmpresas';
 import DemografiaAlumnos from '@/app/ui/admin/DemografiaAlumnos';
+import { API_BASE_URL } from '../lib/config';
 
 export default function Page() {
     const [admins, setAdmins] = useState([]);
@@ -12,7 +13,7 @@ export default function Page() {
     // Función para obtener los administradores desde la API
     const fetchAdmins = async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/administradores`);
+            const res = await fetch(`${API_BASE_URL}/api/admin/administradores`);
             if (res.ok) {
                 const data = await res.json();
                 setAdmins(data);
