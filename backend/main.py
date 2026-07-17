@@ -824,15 +824,19 @@ async def ver_documento(correo: str, id_documento: str, db: Session = Depends(ge
     s3_key = doc.url_archivo.split(f"{BUCKET_NAME}/")[-1]
 
     try:
-        # USAMOS EL CLIENTE PÚBLICO AQUÍ
+        # Generar la URL con la firma de Garage (usará localhost:3900)
         presigned_url = s3_client_public.generate_presigned_url(
             ClientMethod='get_object',
             Params={'Bucket': BUCKET_NAME, 'Key': s3_key},
             ExpiresIn=3600
         )
         
-        # Ya no necesitamos el replace, la URL ya viene con localhost
-        return RedirectResponse(url=presigned_url)
+        # --- AQUÍ OCURRE LA MAGIA ---
+        # Reemplazamos la ruta interna por el dominio expuesto en Apache
+        url_publica = presigned_url.replace("http://localhost:3900", "https://horario.utm.mx")
+        
+        # Redirigimos al usuario a la URL pública
+        return RedirectResponse(url=url_publica)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error al generar el enlace seguro de S3")
