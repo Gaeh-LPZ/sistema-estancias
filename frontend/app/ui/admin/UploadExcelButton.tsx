@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { useState } from "react";
+import { API_BASE_URL } from "@/app/lib/config";
 
 export default function UploadExcelButton() {
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -14,7 +15,7 @@ export default function UploadExcelButton() {
         formData.append("file", file);
 
         try {
-            const respuesta = await fetch("http://localhost:8000/api/estudiantes/cargar-excel", {
+            const respuesta = await fetch(`${API_BASE_URL}/api/estudiantes/cargar-excel`, {
                 method: "POST",
                 body: formData,
             });

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { EstudianteInfo } from "@/app/types/estudiantes/types";
 import { useRouter } from "next/navigation";
 import { extraerDatosCurp } from "@/app/lib/actions";
+import { API_BASE_URL } from "@/app/lib/config";
 
 export default function DatosPersonales({ isEditing, correoEstudiante, datosIniciales }: { isEditing: boolean, correoEstudiante: string, datosIniciales: EstudianteInfo }) {
   const [campoExitoso, setCampoExitoso] = useState<string>("");
@@ -42,7 +43,7 @@ export default function DatosPersonales({ isEditing, correoEstudiante, datosInic
     try {
       const datosAEnviar = { [nombreCampo]: valor, ...datosAdicionales };
 
-      const response = await fetch(`http://localhost:8000/api/estudiantes/perfil/${correoEstudiante}`, {
+      const response = await fetch(`${API_BASE_URL}/api/estudiantes/perfil/${correoEstudiante}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datosAEnviar),

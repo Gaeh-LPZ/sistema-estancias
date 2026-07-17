@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
 import Detalles from "@/app/ui/estudiantes/estancia/detalles/Detalles";
+import { API_BASE_URL } from "@/app/lib/config";
 
 interface Documento {
     id: string;
@@ -66,9 +67,9 @@ export default function PanelValidacion({ correoEstudiante, nombreEstudiante, do
         const toastId = toast.loading(`Actualizando a ${nuevoEstado}...`);
 
         try {
-            let urlApi = `http://localhost:8000/api/admin/documentos/${correoEstudiante}/${docSeleccionado.id}/estado`;
+            let urlApi = `${API_BASE_URL}/api/admin/documentos/${correoEstudiante}/${docSeleccionado.id}/estado`;
             if (docSeleccionado.id === "detalles_formulario") {
-                urlApi = `http://localhost:8000/api/admin/estudiantes/${correoEstudiante}/estado`;
+                urlApi = `${API_BASE_URL}/api/admin/estudiantes/${correoEstudiante}/estado`;
             }
 
             const res = await fetch(urlApi, {
@@ -99,7 +100,7 @@ export default function PanelValidacion({ correoEstudiante, nombreEstudiante, do
         formData.append("file", archivoAdmin);
 
         try {
-            const res = await fetch(`http://localhost:8000/api/admin/documentos/${correoEstudiante}/${docSeleccionado.id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/documentos/${correoEstudiante}/${docSeleccionado.id}`, {
                 method: "POST",
                 body: formData,
             });
@@ -208,7 +209,7 @@ export default function PanelValidacion({ correoEstudiante, nombreEstudiante, do
                                 </div>
                             ) : docSeleccionado.estado !== "Pendiente" ? (
                                 <iframe
-                                    src={`http://localhost:8000/api/estudiantes/documentos/${correoEstudiante}/${docSeleccionado.id}`}
+                                    src={`${API_BASE_URL}/api/estudiantes/documentos/${correoEstudiante}/${docSeleccionado.id}`}
                                     className="w-full h-full border-none"
                                 />
                             ) : (

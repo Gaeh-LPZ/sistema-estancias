@@ -1,10 +1,11 @@
 'use client'
+import { API_BASE_URL } from "@/app/lib/config";
 
 export default function BotonExportar() {
     
     const handleExportar = async () => {
         try {
-            const response = await fetch('http://localhost:8000/api/estudiantes/exportar-excel');
+            const response = await fetch(`${API_BASE_URL}/api/estudiantes/exportar-excel`);
             
             if (!response.ok) throw new Error('Error al generar el archivo');
 

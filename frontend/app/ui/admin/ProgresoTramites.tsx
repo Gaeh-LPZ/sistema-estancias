@@ -1,4 +1,5 @@
 "use client";
+import { API_BASE_URL } from '@/app/lib/config';
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -7,7 +8,7 @@ export default function ProgresoTramites() {
 
   useEffect(() => {
     // Apuntamos a la API de tu backend
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/estadisticas/progreso`)
+    fetch(`${API_BASE_URL}/api/admin/estadisticas/progreso`)
       .then(res => res.json())
       .then(data => setData(data))
       .catch(err => console.error("Error al cargar progreso:", err));

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { IContacto } from "@/app/types/estudiantes/types";
+import { API_BASE_URL } from "@/app/lib/config";
 
 interface ContactoProps {
     isEditing: boolean;
@@ -32,7 +33,7 @@ export default function Contacto({ isEditing, correoUsuario, datosPerfil }: Cont
         try {
             const datosAEnviar = { [nombreCampo]: valor };
 
-            const response = await fetch(`http://localhost:8000/api/estudiantes/perfil/${correoUsuario}`, {
+            const response = await fetch(`${API_BASE_URL}/api/estudiantes/perfil/${correoUsuario}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(datosAEnviar),

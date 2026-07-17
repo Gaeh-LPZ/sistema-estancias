@@ -1,28 +1,29 @@
 "use client";
 import { useState } from 'react';
+import { API_BASE_URL } from '@/app/lib/config';
 
 export default function ModalAgregarAdmin({ isOpen, onClose, onAdminAdded }: { isOpen: boolean, onClose: () => void, onAdminAdded: () => void }) {
     const [formData, setFormData] = useState({ nombre: '', correo: '', contrasena: '', rol_id: 1 });
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/administradores`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...formData, estado: true }) // Por defecto activo
-            });
+    e.preventDefault();
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/administradores`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...formData, estado: true }) // Por defecto activo
+        });
 
-            if (response.ok) {
-                onAdminAdded(); // Recarga la tabla
-                onClose();      // Cierra el modal
-            } else {
-                alert("Error al crear el administrador");
-            }
-        } catch (error) {
-            console.error("Error:", error);
+        if (response.ok) {
+            onAdminAdded(); // Recarga la tabla
+            onClose();      // Cierra el modal
+        } else {
+            alert("Error al crear el administrador");
         }
-    };
+    } catch (error) {
+        console.error("Error:", error);
+    }
+};
 
     if (!isOpen) return null;
 

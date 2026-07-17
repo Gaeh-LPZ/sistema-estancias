@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { API_BASE_URL } from "@/app/lib/config";
 
 interface FormEmpresaProps {
     correoUsuario: string;
@@ -39,7 +40,7 @@ export default function FormEmpresa({ correoUsuario, datosIniciales }: FormEmpre
             const datosAEnviar = { [nombreCampo]: valor };
 
             // Asegúrate de que la URL apunte al endpoint de la empresa
-            const response = await fetch(`http://localhost:8000/api/estudiantes/empresa/${correoUsuario}`, {
+            const response = await fetch(`${API_BASE_URL}/api/estudiantes/empresa/${correoUsuario}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(datosAEnviar),

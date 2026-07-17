@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { API_BASE_URL } from '@/app/lib/config';
 
 const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#8B5CF6'];
 
@@ -8,7 +9,7 @@ export default function SectorEmpresas() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/estadisticas/sectores`)
+    fetch(`${API_BASE_URL}/api/admin/estadisticas/sectores`)
       .then(res => res.json())
       .then(data => setData(data))
       .catch(err => console.error("Error al cargar sectores:", err));

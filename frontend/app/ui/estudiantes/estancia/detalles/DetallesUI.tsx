@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import HeaderDetalles from "@/app/ui/estudiantes/estancia/detalles/HeaderDetalles";
 import Detalles from "@/app/ui/estudiantes/estancia/detalles/Detalles";
+import { API_BASE_URL } from "@/app/lib/config";
 
 interface DetallesUIProps {
     correoUsuario: string;
@@ -24,7 +25,7 @@ export default function DetallesUI({ correoUsuario, datos }: DetallesUIProps) {
         const toastId = toast.loading("Enviando solicitud para validación...");
 
         try {
-            const response = await fetch(`http://localhost:8000/api/estudiantes/estancias/${correoUsuario}/enviar`, {
+            const response = await fetch(`${API_BASE_URL}/api/estudiantes/estancias/${correoUsuario}/enviar`, {
                 method: "PATCH",
             });
 

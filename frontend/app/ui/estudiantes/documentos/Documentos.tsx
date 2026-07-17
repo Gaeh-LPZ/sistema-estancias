@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/app/lib/config";
 
 // 1. Definimos la lista de documentos generales requeridos
 const documentosGenerales = [
@@ -50,7 +51,7 @@ export default function Documentos({ correoUsuario, documentosIniciales }: Docum
         const toastId = toast.loading(`Subiendo documento...`);
 
         try {
-            const res = await fetch(`http://localhost:8000/api/estudiantes/documentos/${correoUsuario}/${idDocumento}`, {
+            const res = await fetch(`${API_BASE_URL}/api/estudiantes/documentos/${correoUsuario}/${idDocumento}`, {
                 method: "POST",
                 body: formData,
             });
@@ -77,7 +78,7 @@ export default function Documentos({ correoUsuario, documentosIniciales }: Docum
 
     const abrirCartaPresentacion = () => {
         // Usamos el endpoint de tu backend pasando el correo del usuario actual
-        window.open(`http://localhost:8000/api/estudiantes/carta-presentacion/${correoUsuario}`, '_blank');
+        window.open(`${API_BASE_URL}/api/estudiantes/carta-presentacion/${correoUsuario}`, '_blank');
     };
 
 

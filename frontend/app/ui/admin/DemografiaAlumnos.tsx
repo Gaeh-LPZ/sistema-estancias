@@ -1,16 +1,22 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { API_BASE_URL } from '@/app/lib/config';
 
 export default function DemografiaAlumnos() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/estadisticas/demografia`)
-      .then(res => res.json())
+    fetch(`${API_BASE_URL}/api/admin/estadisticas/demografia`)
+      .then(res => {
+          if (!res.ok) {
+              throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+      })
       .then(data => setData(data))
       .catch(err => console.error("Error al cargar demografía:", err));
-  }, []);
+}, []);
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-md w-full h-96">

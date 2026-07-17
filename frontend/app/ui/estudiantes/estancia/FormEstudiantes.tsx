@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { IFormEstudiantes } from "@/app/types/estudiantes/types";
+import { API_BASE_URL } from "@/app/lib/config";
 
 interface FormProps {
     correoUsuario: string;
@@ -50,7 +51,7 @@ export default function FormEstudiantes({ correoUsuario, datosIniciales }: FormP
         try {
             const datosAEnviar = { [nombreCampo]: valor };
 
-            const response = await fetch(`http://localhost:8000/api/estudiantes/estancias/${correoUsuario}`, {
+            const response = await fetch(`${API_BASE_URL}/api/estudiantes/estancias/${correoUsuario}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(datosAEnviar),
